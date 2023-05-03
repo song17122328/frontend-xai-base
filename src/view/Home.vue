@@ -1,0 +1,257 @@
+<template xmlns:cursor="http://www.w3.org/1999/xhtml">
+  <el-container class="container">
+<!--    顶部header栏-->
+    <el-header class="header" style="height: 64px">
+      <div class="header-content">
+
+        <!--      标题logo-->
+        <div class="header-logo"  >
+          <img src="@/assets/logo-SHU-CES.jpeg" alt="logo" height="40px">
+          <span>NASICON型固态电解质
+            <span style="width: 1px;height: 18px;background-color: #ccc;display: inline-block;margin: 0 10px;"></span>
+            离子输运性能描述符树管理系统
+          </span>
+        </div>
+
+        <!-- 用户登录信息-->
+        <div class="header-user" @click="signOut">
+        <span>
+          {{userName}}
+        </span>
+        </div>
+      </div>
+
+    </el-header>
+
+    <el-container class="container_low">
+      <!--      左侧导航栏 ,必须设置外层容器高度，让内层容器有滚动条-->
+      <el-aside style="width: 280px; height: 648px;" >
+        <el-menu style="min-height: 648px" :default-active="default_active" unique-opened>
+          <el-submenu :index="item.order" v-for="item in menuData" :key="item.order">
+            <!--表示可以展开的一组 -->
+            <template slot="title">
+<!--              图标-->
+              <i :class=menuIconClass[item.order-1]></i>
+              <!--文字 -->
+              <span>{{item.name}}</span>
+            </template>
+            <!--        :fileUpload="item2.path"，index控制跳转的地址 -->
+            <el-menu-item :index="item2.order" v-for="item2 in item.children" :key="item2.order" @click="changePage(item2.name)">
+              <span>{{item2.name}}</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-aside>
+        <!--主页面高度自适应-->
+      <el-main style="padding-top: 0;padding-right: 20px; height: 648px">
+          <div ref="isShowSteps" v-on:mouseenter="this.isBind" v-on:mouseleave="this.isBind" style="padding-bottom: 5px">
+              <div v-show="showSteps" @click="StepRouterPush">
+                  <el-steps :active="active" finish-status="success" align-center ref="steps">
+                    <el-step title="快速开始" description=""></el-step>
+                    <el-step title="文件上传、预览、导入"></el-step>
+                    <el-step title="数据库增删改查"></el-step>
+                    <el-step title="可视化增删改查"></el-step>
+                    <el-step title="描述符树融合"></el-step>
+                    <el-step title="描述符树冗余消除"></el-step>
+                    <el-step title="重要度评分"></el-step>
+                  </el-steps>
+              </div>
+            <div style="height:15px;font-size: 10px; background-color:#add8e640;" v-show="!showSteps">
+              查看当前步骤
+            </div>
+          </div>
+        <router-view></router-view>
+      </el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script>
+export default {
+  name: "Home",
+  data(){
+    return{
+      isBind:this.doNothing,
+      active: 0,
+      showSteps:false,
+      default_active:'11',
+      routerName:'快速开始',
+      fromSelfClick:false,
+      // routerName:,
+      menuData:[],
+      userData:{},
+      userName:'',
+      //设置菜单前面的小图标,目前有6个,对应图标分别为'首页'，'系统管理'，'专利相关'，'描述符树','机器学习','关于我们'
+      menuIconClass:[
+        'el-icon-s-flag',         //首页
+        'el-icon-s-tools',        //系统管理
+        'el-icon-s-data',         //描述符树
+        'el-icon-s-marketing',    //机器学习
+        'el-icon-phone'           //关于我们
+      ]
+    }
+  },
+  watch:{
+    //是否显示上方进度条，debug用
+    // showSteps:{
+    //   handler(newValue,old){
+    //     console.log(newValue)
+    //   }
+    // }
+  },
+  beforeRouteUpdate(to,from,next){
+    //相当于不发生跳转
+    if (to===from)
+      return
+    else {
+      if (to.name==="快速开始"){
+        this.showSteps=true
+        console.log("我把showStep改成true了")
+        //绑定一个空函数，不报错
+        this.isBind=this.doNothing;
+      }
+      else{
+        this.isBind=this.isShowSteps;
+        if(this.fromSelfClick!==true){
+          this.showSteps=false
+          console.log("我把showStep改成false了")
+        }
+      }
+    }
+    // console.log(this.showSteps)
+    next()
+  },
+  mounted:function () {
+
+    this.getMenuTree();
+    this.getUserInfo();
+    // this.$router.push({ name:"快速介绍" });
+    this.$router.push({ name:this.routerName });
+
+  },
+
+  methods:{
+    StepRouterPush(){
+      this.active=(this.active+1)%7
+      const RouterName=this.$refs.steps.$children[this.active].title
+      //代表点击自身触发路由跳转，不会执行mouseEnter函数
+      this.fromSelfClick=true
+      this.changePage(RouterName)
+    },
+    isShowSteps(){
+      this.showSteps=!this.showSteps
+    },
+    doNothing(){
+      console.log("什么都不做")
+    },
+    changePage(name){
+      this.routerName=name
+      // console.log("跳转了一次")
+      this.$router.push({name:this.routerName})
+    },
+
+    signOut() {
+      this.$confirm("退出登录, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        let params={};
+        this.$axios.post('/user/signOut',params).then(res => {
+          if(res.data.code===1){
+            this.$router.push({ path: "/login" });
+          }else{
+            this.$notify({
+              title: '警告',
+              message: res.data.msg,
+              type: 'warning'
+            });
+          }
+        })
+      });
+    },
+    getMenuTree() {
+      let params={};
+      this.$axios.post('/user/getMenuManageData',params).then(res => {
+        if(res.data.code===1){
+          this.menuData=JSON.parse(res.data.data);
+          // console.log(this.menuData)
+        }else{
+          this.$notify({
+            title: '警告',
+            message: res.data.msg,
+            type: 'warning'
+          });
+        }
+      })
+
+    },
+    getUserInfo() {
+      let params={};
+      this.$axios.post('/user/getUserInfo',params).then(res => {
+        if(res.data.code===1){
+          this.userData=JSON.parse(res.data.data);
+          this.userName=this.userData.userName;
+        }else{
+          this.$notify({
+            title: '警告',
+            message: res.data.msg,
+            type: 'warning'
+          });
+        }
+      })
+    },
+    goBack() {
+      if (window.history.length > 1) {
+        this.$router.go(-1);
+      }
+    },
+  }
+}
+</script>
+
+<style scoped>
+
+  .container {
+    font-size: 15px;
+  }
+
+  .header {
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 2px 8px #f0f1f2;
+    display: flex;
+    justify-content: space-between;
+  }
+ .header-content{
+   margin: auto 40px;
+ }
+ .header-user{
+   display: inline-block;
+   margin: auto auto auto 600px;
+ }
+ .header-logo{
+   display: inline-block;
+   font-size: 22px;
+   color: #273849;
+   font-family: "Dosis", "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+   font-weight: 500;
+ }
+  .header-logo img {
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .container_low{
+    padding: 10px 0 0 0 ;
+
+  }
+
+  /*隐藏进度条*/
+  .el-aside::-webkit-scrollbar {
+    display: none;
+  }
+  .el-main::-webkit-scrollbar {
+    display: none;
+  }
+
+</style>
