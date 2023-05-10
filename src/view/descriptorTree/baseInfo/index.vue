@@ -26,7 +26,7 @@ export default {
   components:{DescriptorTreeInfo,DescriptorTreeStruct,TreeTable},
   data() {
     return {
-      activeName: 'third'
+      activeName: 'first'
     };
   },
   methods: {

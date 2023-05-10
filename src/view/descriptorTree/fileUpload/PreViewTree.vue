@@ -1,18 +1,20 @@
 <template>
   <div>
-    <div style="display:inline-block;position: relative;top:-35px; left: 180px">
+    <div style="display:inline-block;position: relative;top:-40px; left: 180px">
       <el-button @click="TreeCurrentNumber=TreeCurrentNumber-1" icon="el-icon-minus"
                  size="small" circle></el-button>
       <span style="color: #57ab57">共有{{this.TreeNumber}}课树，当前为第{{this.TreeCurrentNumber}}棵</span>
 <!--      <el-input v>111</el-input>-->
       <el-button @click="TreeCurrentNumber=TreeCurrentNumber+1" icon="el-icon-plus" size="small"circle></el-button>
-      <span>该树类型为: </span>
+      <span style="margin-left:50px;" >该树类型为: </span>
 
-      <el-input v-model="TreeTypes[TreeCurrentNumber-1]" style="width: 100px"></el-input>
-
+      <el-input  v-if="dataLoaded"
+                 v-model="myTreeData[TreeCurrentNumber-1].TreeType"
+                 style="width: 100px">
+      </el-input>
     </div>
 
-    <div style="display:inline-block;position: relative;top: -35px;left:300px">
+    <div style="display:inline-block;position: relative;top: -40px;left:300px">
 
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
@@ -21,7 +23,7 @@
         active-color="#57ab57"
         inactive-color="#ce820f">
       </el-switch>
-      <el-button @click="commit">提交到数据库</el-button>
+      <el-button @click="commit" type="primary" style="margin-left: 50px">提交到数据库</el-button>
     </div>
       <div id="mountNode"></div>
 
@@ -35,11 +37,16 @@ export default {
   props: {
     myTreeData: {
       required: true
+    },
+    myStructData: {
+      required: true
     }
   },
   data(){
     return{
-      TreeTypes:[],
+      dataLoaded: false,
+      // 将数据保存到其他数据属性中
+      foldData:null,
       //渲染对象
       TreeCurrentNumber:'',
       TreeNumber:'',
@@ -74,11 +81,6 @@ export default {
     }
   },
   watch:{
-    TreeTypes:{
-      handler(newValue,oldValue){
-        console.log(newValue)
-      }
-    },
     TreeCurrentNumber:{
       handler(newvalue,oldvalue){
         if (newvalue<1 ||newvalue>this.TreeNumber){
@@ -113,8 +115,10 @@ export default {
     //  修改类型
       for (let i=0;i<this.myTreeData.length;i++)
       {
-        this.myTreeData[i].Treetype=this.TreeTypes[i]
-        alert("第"+i+"课树的类型为"+this.myTreeData[i].Treetype)
+        this.myStructData[i].forEach((node)=>{
+          node["TreeType"]=this.myTreeData[i].TreeType
+        })
+        alert("第"+Number(i+1)+"课树的类型为"+this.myTreeData[i].TreeType)
       }
 
       this.$confirm("确认提交到数据库吗？",'提示',{
@@ -122,10 +126,22 @@ export default {
         cancelButtonText: '取消',
         type: 'info'
       }) .then(() => {
-        this.$message({
-          type: 'success',
-          message: '提交成功!'
-        });
+        // 需要把二维列表拉直成一维列表插入数据库
+        console.log(this.myStructData.flat())
+        this.$axios.post("http://127.0.0.1:5000/TreeStructData",this.myStructData.flat()).then(
+          res=>{
+            this.$message({
+              type: 'success',
+              message: res.data
+            });
+          },
+          error=>{
+            this.$message({
+              type: 'error',
+              message: error.data
+            });
+          }
+        )
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -439,6 +455,8 @@ export default {
    // console.log("preview中的：",this.myTreeData)
 
     console.log("this.myTreeData:",this.myTreeData)
+    this.dataLoaded = true;
+    // 将数据保存到其他数据属性中
     this.drawGraph(this.myTreeData)
   }
 }

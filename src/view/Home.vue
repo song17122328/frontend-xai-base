@@ -243,7 +243,6 @@ export default {
   }
   .container_low{
     padding: 10px 0 0 0 ;
-
   }
 
   /*隐藏进度条*/

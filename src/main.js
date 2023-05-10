@@ -9,12 +9,15 @@ import axios from 'axios'
 import md5 from 'js-md5';
 import VueResource from 'vue-resource'
 import  * as  echarts from 'echarts'
+import { v4 as uuidv4 } from 'uuid';
+
 
 Vue.use(VueResource)
 Vue.use(ElementUI);   //新添加
 axios.defaults.baseURL = '/api';  //vue文件里加了api就不用了
 Vue.prototype.$md5 = md5;
 Vue.prototype.$axios = axios;
+Vue.prototype.$uuid = uuidv4;
 Vue.prototype.$echarts = echarts; //注册echarts组件
 Vue.config.productionTip = false;
 axios.defaults.withCredentials = true; //请求发送cookie

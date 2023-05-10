@@ -6,11 +6,9 @@
     <div class="find" style="">
       <el-input placeholder="节点名" v-model="pagination.nodeName" style="width: 200px;"
                 class="filter-item"></el-input>
-      <el-input placeholder="类型" v-model="pagination.type" style="width: 200px;"
+      <el-input placeholder="类型" v-model="pagination.treeType" style="width: 200px;"
                 class="filter-item"></el-input>
-      <el-input placeholder="水平层级，必须填数字" v-model="pagination.levelHierarchy" style="width: 200px;"
-                class="filter-item"></el-input>
-      <el-input placeholder="孩子数组" v-model="pagination.childArray" style="width: 200px;"
+      <el-input placeholder="孩子数组" v-model="pagination.childrenName" style="width: 200px;"
                 class="filter-item"></el-input>
       <el-button @click="getAll()" class="dalfBut">查询</el-button>
       <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
@@ -25,45 +23,30 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item  v-for="(item,index) in props.row.childArray" :key="index" :label="String(index+1)">
+            <el-form-item  v-for="(item,index) in props.row.childrenName" :key="index" :label="String(index+1)">
               <span style="white-space:pre-wrap;">{{ item }}</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
-<!--      <el-table-column-->
-<!--        label="编号"-->
-<!--        prop="id"-->
-<!--        width="140">>-->
-<!--        <template slot-scope="scope">-->
-<!--          {{scope.row.id.counter}}-->
-<!--        </template>-->
-<!--      </el-table-column>-->
+
       <el-table-column
         label="英文名"
         prop="nodeName"
-        width="240"
+        min-width="100"
         >
         <template slot-scope="scope">
   <!--    white-space:pre-wrap; 保留空白符序列，但是正常地进行换行。    -->
           <span style="white-space:pre-wrap;">{{scope.row.nodeName}}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="根节点"
-        prop="rootName"
-        width="300">
-      </el-table-column>
+
       <el-table-column
         label="类型"
-        prop="type">
+        prop="treeType">
       </el-table-column>
-      <el-table-column
-        label="水平层级"
-        prop="levelHierarchy"
-      width="100">
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="200">>
+
+      <el-table-column label="操作" align="center">>
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
@@ -95,28 +78,18 @@
               <el-input v-model="formData.nodeName"/>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="根节点" prop="rootName">
-              <el-input v-model="formData.rootName"/>
-            </el-form-item>
-          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
             <el-form-item label="类型" prop="type">
-              <el-input v-model="formData.type"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="水平层级" prop="levelHierarchy">
-              <el-input v-model="formData.levelHierarchy"/>
+              <el-input v-model="formData.treeType"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="24">
             <el-form-item label="孩子数组">
-              <el-input v-model="formData.ChildArray" type="textarea"></el-input>
+              <el-input v-model="formData.childrenName" type="textarea"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -139,37 +112,27 @@
               <el-input v-model="formData.nodeName"/>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="根节点" prop="rootName">
-              <el-input v-model="formData.rootName"/>
-            </el-form-item>
-          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
             <el-form-item label="类型" prop="type">
-              <el-input v-model="formData.type"/>
+              <el-input v-model="formData.treeType"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="水平层级" prop="levelHierarchy">
-              <el-input v-model="formData.levelHierarchy"/>
-            </el-form-item>
-          </el-col>
+
         </el-row>
         <el-row>
           <el-col :span="24">
             <el-form-item label="孩子数组">
-              <div v-for="(value,index) in formData.childArray" :key="index">
-                <el-input v-model=formData.childArray[index] style="width: 265px;margin-right:25px;margin-bottom: 15px">
+              <div v-for="(value,index) in formData.childrenName" :key="index">
+                <el-input v-model=formData.childrenName[index] style="width: 265px;margin-right:25px;margin-bottom: 15px">
                 </el-input>
                 <el-button type="danger" icon="el-icon-delete" circle style="margin-right:15px;margin-bottom: 10px"
-                           @click="formData.childArray.splice(index,1)"
+                           @click="formData.childrenName.splice(index,1);formData.childrenId.splice(index,1);"
                 ></el-button>
               </div>
-                <el-button type="success" circle icon="el-icon-plus" @click="formData.childArray.push('')"></el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -201,10 +164,8 @@ export default {
 
         //查询条件
         nodeName: '',
-        rootName: '',
-        childArray: '',
-        levelHierarchy: '',
-        type: ''
+        treeType: '',
+        childrenName: '',
       },
 
       //表单信息
@@ -229,21 +190,25 @@ export default {
       //组织参数，拼接url地址
       let param;
       param = "?query"
-      if (this.pagination.nodeName !== "")
+      if (this.pagination.nodeName !== ""&& this.pagination.nodeName.length!==0)
+      {
         param += "&nodeName=" + this.pagination.nodeName;
-      if (this.pagination.rootName !== "")
-        param += "&rootName=" + this.pagination.rootName;
-      if (this.pagination.type !== "")
-        param += "&type=" + this.pagination.type;
-      if (this.pagination.levelHierarchy !== "")
-        param += "&levelHierarchy=" + this.pagination.levelHierarchy;
-      if (this.pagination.childArray !== "")
-        param += "&childArray=" + this.pagination.childArray;
+      }
+      if (this.pagination.treeType !== "" && this.pagination.treeType.length!==0)
+      {
+        param += "&treeType=" + this.pagination.treeType;
+      }
+      if (this.pagination.childrenName !== ""&& this.pagination.childrenName.length!==0)
+      {
+        param += "&childrenName=" + this.pagination.childrenName;
+      }
       let url=this.url + this.pagination.currentPage + "/" + this.pagination.pageSize + param
       console.log(url);
       //发送异步请求
       this.$axios.get(url)
+      // this.$axios.get(this.url)
         .then((resp) => {
+          console.log(resp.data)
           //更新页面数据
           this.TreeStruct = resp.data.content;
           //更新分页组件总条数
@@ -265,10 +230,8 @@ export default {
     //  重置查询框
     resetSelect() {
       this.pagination.nodeName = '';
-      this.pagination.levelHierarchy = '';
-      this.pagination.rootName = '';
-      this.pagination.type='';
-      this.pagination.childArray='';
+      this.pagination.treeType = '';
+      this.pagination.childrenName = '';
       this.getAll();
     },
     //  下面为编辑表单函数
@@ -310,7 +273,8 @@ export default {
     // 删除
     handleDelete(row) {
       this.$confirm("将永久删除当前信息，是否继续？", "提示", {type: "info"}).then(() => {
-        this.$axios.post(this.url+"/delete",row.id).then((res) => {
+
+        this.$axios.post(this.url+"/delete",{id: row.id}).then((res) => {
           console.log(res)
           //    判断当前操作是否成功
           if (res.data.deletedCount===1) {
@@ -329,8 +293,10 @@ export default {
 
     //弹出编辑窗口
     handleUpdate(row) {
-      this.$axios.post(this.url,row.id).then((res) => {
-        console.log(res)
+
+      this.$axios.post(this.url,{id: row.id}).then((res) => {
+        console.log("查询的id是",row.id)
+        console.log(res.data)
         if (res.data != null) {
           this.dialogFormVisible4Edit = true;
           this.formData = res.data;

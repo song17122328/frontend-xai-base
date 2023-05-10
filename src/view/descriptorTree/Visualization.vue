@@ -57,9 +57,9 @@
       <el-select v-model="TreeType" filterable placeholder="请选择可视化树">
         <el-option
           v-for="item in TreeTypes"
-          :key="item.type"
-          :label="item.label"
-          :value="item.type">
+          :key="item"
+          :label="item"
+          :value="item">
         </el-option>
       </el-select>
 
@@ -745,11 +745,12 @@ export default{
 
     //从现有的类型中添加树
     GetTreeType() {
-      console.log("GetTreeType")
-      this.$axios.get('/TreeType').then(
+      this.$axios.get('/TreeStruct/types').then(
         (res) => {
-          // console.log(res.data)
-          this.TreeTypes = res.data;
+          res.data.forEach((data)=>{
+            this.TreeTypes.push(data)
+          });
+          // console.log("GetTreeType:",this.TreeTypes)
           //得到种类之后，再执行GetAll
           this.GetAll()
         },
@@ -794,22 +795,18 @@ export default{
     },
 
     //弹出新增对话框
-    AddChild(FatherNode){
+    AddChild(Node){
       console.log(this.AddForm)
       //重置新增表单
       this.AddForm={};
-      //添加信息
-      const Father=FatherNode.getModel()
-      //增加根节点名
-      this.AddForm.rootName=this.TreeData.nodeName
-      //增加父节点名
-      this.AddForm.fatherName=Father.nodeName
+      //父节点ID为点击结点，当前结点ID使用uuid4生成
+      this.AddForm.id=this.$uuid()
+      this.AddForm.parentId=Node.getModel().id
       //增加树的类型
       this.AddForm.treeType=this.TreeType
-      //增加水平层级
-      this.AddForm.levelHierarchy=Father.levelHierarchy+1
+
       //增加概念层级：根据规则自动生成
-      let FatherConceptHierarchy=Father.conceptHierarchy
+      let FatherConceptHierarchy=Node.conceptHierarchy
       if (FatherConceptHierarchy===this.TreeType)  //根节点
       {
         console.log("判断是否是根节点")
@@ -831,10 +828,10 @@ export default{
     //提交新增对话框
     AddChildToDataBase(){
       //提交信息到后台
+      console.log(this.AddForm)
       this.$axios.put(this.url,this.AddForm).then(
         res=>{
           this.$message.success(res.data)
-
           //修改查询标记
           this.isFind=false;
           //添加查询结点名字
@@ -858,7 +855,7 @@ export default{
     //弹出修改对话框
     EditNode(node){
       this.EditForm=node.getModel();
-      //增加父节点名
+      //增加旧的节点名，根据结点名去修改信息结点
       this.EditForm.oldName=node.getModel().nodeName
       //增加树的类型
       this.EditForm.treeType=this.TreeType

@@ -2,8 +2,33 @@
   <div>
     <div style="position: relative;top: 10px;left:760px">
       <span  style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #fdec98;color:black;border: 1px solid #fdec98;margin-right:20px">&nbsp;&nbsp;mix&nbsp;&nbsp;</span>
-      <span style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #a3a3ff;color:black;margin-right:20px">&nbsp;{{treeA}}&nbsp;</span>
-      <span  style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #ffa4a4;color:black;margin-right:20px">&nbsp;{{treeB}}&nbsp;</span>
+      <el-dropdown @command="handleClickTreeA">
+        <span style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #a3a3ff;color:black;margin-right:20px">&nbsp;{{treeA}}&nbsp;</span>
+
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item     v-for="(item,index) in TreeTypes"
+                                :key="index"
+                                :label="item"
+                                :command="item"
+                                >
+          {{item}}
+          </el-dropdown-item>
+      </el-dropdown-menu>
+      </el-dropdown>
+
+      <el-dropdown @command="handleClickTreeB">
+        <span  style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #ffa4a4;color:black;margin-right:20px">&nbsp;{{treeB}}&nbsp;</span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item     v-for="(item,index) in TreeTypes"
+                                :key="index"
+                                :label="item"
+                                :command="item"
+          >
+            {{item}}
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+
 
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
@@ -24,6 +49,7 @@ import G6 from "@antv/g6";
 export default {
   data(){
     return{
+      TreeTypes: [],
       horizontalOrVertical:false,
       //横向锚点
       horizontalAnchor:[
@@ -56,6 +82,16 @@ export default {
     }
   },
   watch:{
+    treeA:{
+      handler(newValue,oldValue){
+        this.GetAll()
+      }
+    },
+    treeB:{
+      handler(newValue,oldValue){
+        this.GetAll()
+      }
+    },
     horizontalOrVertical:{
       handler(newvalue,oldvalue){
         this.$nextTick(()=>{
@@ -75,6 +111,27 @@ export default {
     }
   },
   methods: {
+    //从现有的类型中添加树
+    GetTreeType() {
+      console.log("GetTreeType")
+      this.$axios.get('/TreeStruct/types').then(
+        (res) => {
+          res.data.forEach((data)=>{
+            this.TreeTypes.push(data)
+          });
+          //得到种类之后，再执行GetAll
+          this.GetAll()
+        },
+        error => {
+          console.log(error)
+        })
+    },
+    handleClickTreeA(target){
+      this.treeA=target
+    },
+    handleClickTreeB(target){
+      this.treeB=target
+    },
     DefaultConfig(){
       return {
         backgroundColor: 'gray',
@@ -429,6 +486,7 @@ export default {
     this.registerFn()
     this.getTreeGraph();
     this.GetAll()
+    this.GetTreeType()
   }
 }
 </script>
