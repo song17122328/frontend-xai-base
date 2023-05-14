@@ -26,7 +26,7 @@
     <el-container class="container_low">
       <!--      左侧导航栏 ,必须设置外层容器高度，让内层容器有滚动条-->
       <el-aside style="width: 280px; height: 648px;" >
-        <el-menu style="min-height: 648px" :default-active="default_active" unique-opened>
+        <el-menu style="min-height: 648px" :default-active="String(11)" unique-opened>
           <el-submenu :index="item.order" v-for="item in menuData" :key="item.order">
             <!--表示可以展开的一组 -->
             <template slot="title">
@@ -71,13 +71,11 @@ export default {
   name: "Home",
   data(){
     return{
+      countActive: sessionStorage.getItem('stepActove')||0,
       isBind:this.doNothing,
-      active: 0,
-      showSteps:false,
-      default_active:'11',
-      routerName:'快速开始',
+      showSteps:true,
       fromSelfClick:false,
-      // routerName:,
+
       menuData:[],
       userData:{},
       userName:'',
@@ -92,21 +90,59 @@ export default {
     }
   },
   watch:{
-    //是否显示上方进度条，debug用
-    // showSteps:{
-    //   handler(newValue,old){
-    //     console.log(newValue)
-    //   }
-    // }
+
   },
-  beforeRouteUpdate(to,from,next){
-    //相当于不发生跳转
-    if (to===from)
-      return
-    else {
-      if (to.name==="快速开始"){
+  computed:{
+    //利用sessionStorage和计算属性，使得该属性刷新也不改变，可以一直存储
+    active:{
+      get(){
+        // console.log(this.countActive)
+        return Number(this.countActive);
+      },
+      set(value){
+        value=value%7
+        sessionStorage.setItem('stepActove',value);
+        this.countActive = value;
+      },
+    }
+  },
+
+  mounted:function () {
+
+    this.getMenuTree();
+    this.getUserInfo();
+    this.detectionRouter()
+  },
+
+  methods:{
+    StepRouterPush(){
+
+      this.active++
+      // console.log("点击事件触发了",this.active)
+      const RouterName=this.$refs.steps.$children[this.active].title
+      //代表点击自身触发路由跳转，不会执行mouseEnter函数
+      this.fromSelfClick=true
+
+      this.changePage(RouterName)
+      this.detectionRouter()
+    },
+    isShowSteps(){
+      this.showSteps=!this.showSteps
+    },
+    doNothing(){
+      // console.log("执行了doNoting函数")
+    },
+    changePage(name){
+      // console.log("跳转了一次")
+      if (this.$route.name !== name) {
+        this.$router.push({name: name});
+      }
+    },
+    detectionRouter(){
+      // console.log(this.$route)
+      if (this.$route.name==="快速开始"){
         this.showSteps=true
-        console.log("我把showStep改成true了")
+        // console.log("我把showStep改成true了")
         //绑定一个空函数，不报错
         this.isBind=this.doNothing;
       }
@@ -114,42 +150,10 @@ export default {
         this.isBind=this.isShowSteps;
         if(this.fromSelfClick!==true){
           this.showSteps=false
-          console.log("我把showStep改成false了")
+          // console.log("我把showStep改成false了")
         }
       }
-    }
-    // console.log(this.showSteps)
-    next()
-  },
-  mounted:function () {
-
-    this.getMenuTree();
-    this.getUserInfo();
-    // this.$router.push({ name:"快速介绍" });
-    this.$router.push({ name:this.routerName });
-
-  },
-
-  methods:{
-    StepRouterPush(){
-      this.active=(this.active+1)%7
-      const RouterName=this.$refs.steps.$children[this.active].title
-      //代表点击自身触发路由跳转，不会执行mouseEnter函数
-      this.fromSelfClick=true
-      this.changePage(RouterName)
     },
-    isShowSteps(){
-      this.showSteps=!this.showSteps
-    },
-    doNothing(){
-      console.log("什么都不做")
-    },
-    changePage(name){
-      this.routerName=name
-      // console.log("跳转了一次")
-      this.$router.push({name:this.routerName})
-    },
-
     signOut() {
       this.$confirm("退出登录, 是否继续?", "提示", {
         confirmButtonText: "确定",

@@ -10,7 +10,8 @@ import md5 from 'js-md5';
 import VueResource from 'vue-resource'
 import  * as  echarts from 'echarts'
 import { v4 as uuidv4 } from 'uuid';
-
+//引入store
+import store from './store'
 
 Vue.use(VueResource)
 Vue.use(ElementUI);   //新添加
@@ -19,6 +20,8 @@ Vue.prototype.$md5 = md5;
 Vue.prototype.$axios = axios;
 Vue.prototype.$uuid = uuidv4;
 Vue.prototype.$echarts = echarts; //注册echarts组件
+
+//关闭vue的生产提示
 Vue.config.productionTip = false;
 axios.defaults.withCredentials = true; //请求发送cookie
 
@@ -56,7 +59,11 @@ axios.interceptors.response.use(response =>{
 /* eslint-disable no-new */
 let v=new Vue({
   el: '#app',
-  router,
+  router:router,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  store:store,
+  beforeCreate() {
+    Vue.prototype.$bus=this; //安装全局事件总线
+  }
 })

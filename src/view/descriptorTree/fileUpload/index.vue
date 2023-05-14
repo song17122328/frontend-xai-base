@@ -56,7 +56,7 @@ export default {
   methods: {
     //描述符树上传成功后处理
     handleSuccessTree(response) {
-      console.log(response);
+      // console.log(response);
       // 这里处理Flask返回的响应
     },
     //上传描述符树文件
@@ -69,7 +69,7 @@ export default {
           'Content-Type': 'multipart/form-data'
         }
       }).then(response => {
-        console.log(response.data);
+        // console.log(response.data);
         // console.log("this.treeData:",this.treeData)
         this.treeData=response.data['nested_JSON']
         this.structData=response.data['structured_JSON']
@@ -84,7 +84,7 @@ export default {
 
     //描述符信息文件上传成功后处理
     handleSuccessInfo(response) {
-      console.log(response);
+      // console.log(response);
       // 这里处理Flask返回的响应
     },
     //上传描述符信息文件

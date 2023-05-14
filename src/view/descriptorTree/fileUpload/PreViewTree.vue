@@ -95,8 +95,8 @@ export default {
     horizontalOrVertical:{
       handler(newvalue,oldvalue){
         this.$nextTick(()=>{
-          console.log("执行改变按钮")
-          console.log(this.treeGraph)
+          // console.log("执行改变按钮")
+          // console.log(this.treeGraph)
           if (newvalue)
           {
             this.treeGraph.cfg.layout.direction="LR"
@@ -127,7 +127,7 @@ export default {
         type: 'info'
       }) .then(() => {
         // 需要把二维列表拉直成一维列表插入数据库
-        console.log(this.myStructData.flat())
+        // console.log(this.myStructData.flat())
         this.$axios.post("http://127.0.0.1:5000/TreeStructData",this.myStructData.flat()).then(
           res=>{
             this.$message({
@@ -203,8 +203,8 @@ export default {
           // 节点宽度的回调函数，控制每个节点的宽度
           getWidth: (node) => {
             const nodeName=node.nodeName
-            console.log("node:",node)
-            console.log("nodeName:",nodeName)
+            // console.log("node:",node)
+            // console.log("nodeName:",nodeName)
             return nodeName.length<30?360:nodeName.length*12
           },
           //节点纵向间距的回调函数
@@ -262,7 +262,7 @@ export default {
       for(let i=0;i<this.foldData.length;i++){
         this.UpDateToFoldData(this.foldData[i])
       }
-      console.log("this.foldData:",this.foldData)
+      // console.log("this.foldData:",this.foldData)
     },
 
     registerFn() {
@@ -454,7 +454,7 @@ export default {
   mounted() {
    // console.log("preview中的：",this.myTreeData)
 
-    console.log("this.myTreeData:",this.myTreeData)
+    // console.log("this.myTreeData:",this.myTreeData)
     this.dataLoaded = true;
     // 将数据保存到其他数据属性中
     this.drawGraph(this.myTreeData)

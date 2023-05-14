@@ -137,7 +137,7 @@ export default {
                 message: '登录成功',
                 type: 'success'
               });
-              this.$router.push({ path: "/home" });
+              this.$router.push({ name:"快速开始" });
             } else {
               this.$notify({
                 title: '警告',

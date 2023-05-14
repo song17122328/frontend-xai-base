@@ -262,7 +262,7 @@ export default {
       if (this.pagination.source !== "")
         param += "&source=" + this.pagination.source;
       let url=this.url + this.pagination.currentPage + "/" + this.pagination.pageSize + param
-      console.log(url);
+      // console.log(url);
       //发送异步请求
       this.$axios.get(url)
         .then(

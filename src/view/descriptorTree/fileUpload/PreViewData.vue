@@ -73,7 +73,7 @@ export default {
     },
   },
   mounted() {
-    console.log(this.myInfoData)
+    // console.log(this.myInfoData)
     // console.log(typeof this.myInfoData)
 
   }

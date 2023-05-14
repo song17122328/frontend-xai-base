@@ -203,12 +203,12 @@ export default {
         param += "&childrenName=" + this.pagination.childrenName;
       }
       let url=this.url + this.pagination.currentPage + "/" + this.pagination.pageSize + param
-      console.log(url);
+      // console.log(url);
       //发送异步请求
       this.$axios.get(url)
       // this.$axios.get(this.url)
         .then((resp) => {
-          console.log(resp.data)
+          // console.log(resp.data)
           //更新页面数据
           this.TreeStruct = resp.data.content;
           //更新分页组件总条数
@@ -295,8 +295,8 @@ export default {
     handleUpdate(row) {
 
       this.$axios.post(this.url,{id: row.id}).then((res) => {
-        console.log("查询的id是",row.id)
-        console.log(res.data)
+        // console.log("查询的id是",row.id)
+        // console.log(res.data)
         if (res.data != null) {
           this.dialogFormVisible4Edit = true;
           this.formData = res.data;
@@ -313,7 +313,7 @@ export default {
     handleEdit() {
       this.$axios.put(this.url, this.formData).then((res) => {
         //    判断当前操作是否成功
-        console.log(res)
+        // console.log(res)
         if (res.data !==null) {
           //    1.关闭弹层
           this.dialogFormVisible4Edit = false;

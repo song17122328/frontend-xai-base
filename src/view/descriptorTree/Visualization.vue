@@ -370,7 +370,7 @@ export default{
             // 若字符小于18个，则每个宽15，共宽度为270；超过18个字符的，多超过一个加10宽度，共(x-18)*10+270=x*10+90
 
             const adaptWidth = nodeName.length<30?300:nodeName.length*10
-            console.log()
+            // console.log()
             const rectConfig = {
               width: adaptWidth,
               height: 120,
@@ -644,7 +644,7 @@ export default{
         // edge.isSelected(
         edge.getModel().highLight=!edge.getModel().highLight
         treeGraph.refreshItem(edge)
-        console.log(edge)
+        // console.log(edge)
       });
       // 应该能控制渲染效果
       treeGraph.get('canvas').set('localRefresh', false)
@@ -707,7 +707,7 @@ export default{
 
     //查询某一结点是否存在并高亮
     FindNodeHighLight(node,nodeName) {
-      console.log(node.nodeName,nodeName)
+      // console.log(node.nodeName,nodeName)
       if (nodeName===node.nodeName)
       {
         // alert("找到该节点")
@@ -768,7 +768,7 @@ export default{
       // this.foldData=data
       //递归把原始数据改成绘图所需要的数据
       this.UpDateToFoldData(this.foldData);
-      console.log("this.TreeData",this.TreeData)
+      // console.log("this.TreeData",this.TreeData)
       //首次需要先得到treeGraph对象
       if (!this.treeGraph)
         this.getTreeGraph()
@@ -784,7 +784,7 @@ export default{
           this.TreeData.conceptHierarchy = this.TreeType
           // console.log(this.TreeData)
           this.Init(this.TreeData)
-          console.log("this.FindNodeName.length",this.FindNodeName.length)
+          // console.log("this.FindNodeName.length",this.FindNodeName.length)
           if(this.FindNodeName.length !== 0){
             this.FindNode(this.FindNode)
           }
@@ -796,7 +796,7 @@ export default{
 
     //弹出新增对话框
     AddChild(Node){
-      console.log(this.AddForm)
+      // console.log(this.AddForm)
       //重置新增表单
       this.AddForm={};
       //父节点ID为点击结点，当前结点ID使用uuid4生成
@@ -809,17 +809,17 @@ export default{
       let FatherConceptHierarchy=Node.conceptHierarchy
       if (FatherConceptHierarchy===this.TreeType)  //根节点
       {
-        console.log("判断是否是根节点")
+        // console.log("判断是否是根节点")
         this.$set(this.AddForm,'conceptHierarchy',"粗粒度层")
       }
       else if(FatherConceptHierarchy==="粗粒度层")
       {
-        console.log("判断是否是粗粒度")
+        // console.log("判断是否是粗粒度")
         this.$set(this.AddForm,'conceptHierarchy',"细粒度层")
       }
       else
       {
-        console.log("判断是否是细粒度")
+        // console.log("判断是否是细粒度")
         this.$set(this.AddForm,'conceptHierarchy',"概念层")
       }
 
@@ -828,7 +828,7 @@ export default{
     //提交新增对话框
     AddChildToDataBase(){
       //提交信息到后台
-      console.log(this.AddForm)
+      // console.log(this.AddForm)
       this.$axios.put(this.url,this.AddForm).then(
         res=>{
           this.$message.success(res.data)
@@ -860,7 +860,7 @@ export default{
       //增加树的类型
       this.EditForm.treeType=this.TreeType
       this.EditDialogFormVisible=true;
-      console.log(this.EditForm)
+      // console.log(this.EditForm)
       if (this.EditForm.conceptHierarchy===null){
         this.EditForm.conceptHierarchy="概念层级"
       }
@@ -956,7 +956,7 @@ export default{
     //初始化结点类型
     this.registerFn()
     this.GetTreeType()
-    console.log(this)
+    // console.log(this)
   }
 }
 </script>

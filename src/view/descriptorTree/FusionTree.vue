@@ -1,34 +1,14 @@
 <template>
   <div>
-    <div style="position: relative;top: 10px;left:760px">
-      <span  style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #fdec98;color:black;border: 1px solid #fdec98;margin-right:20px">&nbsp;&nbsp;mix&nbsp;&nbsp;</span>
-      <el-dropdown @command="handleClickTreeA">
-        <span style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #a3a3ff;color:black;margin-right:20px">&nbsp;{{treeA}}&nbsp;</span>
-
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item     v-for="(item,index) in TreeTypes"
-                                :key="index"
-                                :label="item"
-                                :command="item"
-                                >
-          {{item}}
-          </el-dropdown-item>
-      </el-dropdown-menu>
-      </el-dropdown>
-
-      <el-dropdown @command="handleClickTreeB">
-        <span  style="background-color:#f9f9fa;box-shadow:0px 0px 5px 5px #ffa4a4;color:black;margin-right:20px">&nbsp;{{treeB}}&nbsp;</span>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item     v-for="(item,index) in TreeTypes"
-                                :key="index"
-                                :label="item"
-                                :command="item"
-          >
-            {{item}}
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-
+    <div style="position: relative;top: 10px;left:560px">
+      <el-select  style="width: 400px;margin-right: 20px" v-if="isGetTypes" v-model="Trees" multiple placeholder="请选择">
+        <el-option
+          v-for="item in TreeTypes"
+          :key="item"
+          :label="item"
+          :value="item">
+        </el-option>
+      </el-select>
 
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
@@ -50,6 +30,8 @@ export default {
   data(){
     return{
       TreeTypes: [],
+      Trees:[],
+      isGetTypes:false,
       horizontalOrVertical:false,
       //横向锚点
       horizontalAnchor:[
@@ -74,29 +56,20 @@ export default {
         '#D7D7D7'
       ],
       url:"FusionTree",
-      treeA:"expert",
-      treeB:"fusion",
 
       treeGraph:'',
       TreeData:''
     }
   },
+  computed:{
+
+  },
   watch:{
-    treeA:{
-      handler(newValue,oldValue){
-        this.GetAll()
-      }
-    },
-    treeB:{
-      handler(newValue,oldValue){
-        this.GetAll()
-      }
-    },
     horizontalOrVertical:{
       handler(newvalue,oldvalue){
         this.$nextTick(()=>{
-          console.log("执行改变按钮")
-          console.log(this.treeGraph)
+          // console.log("执行改变按钮")
+          // console.log(this.treeGraph)
           if (newvalue)
           {
             this.treeGraph.cfg.layout.direction="LR"
@@ -110,27 +83,24 @@ export default {
       }
     }
   },
+
   methods: {
     //从现有的类型中添加树
     GetTreeType() {
-      console.log("GetTreeType")
+      // console.log("GetTreeType")
       this.$axios.get('/TreeStruct/types').then(
         (res) => {
           res.data.forEach((data)=>{
             this.TreeTypes.push(data)
+            this.Trees.push(data)
           });
           //得到种类之后，再执行GetAll
+          this.isGetTypes=true
           this.GetAll()
         },
         error => {
           console.log(error)
         })
-    },
-    handleClickTreeA(target){
-      this.treeA=target
-    },
-    handleClickTreeB(target){
-      this.treeB=target
     },
     DefaultConfig(){
       return {
@@ -172,7 +142,7 @@ export default {
             stroke: '#CED4D9'
           }
         },
-        // 布局
+        // 布局fax
         layout:{
           type: 'compactBox', // 布局类型
             direction: this.horizontalOrVertical?"LR":"TB", // 展开的方向
@@ -204,7 +174,6 @@ export default {
 
     UpDateToFoldData(node) {
       //当前节点取消高亮
-      node.highLight=false;
       node.foldchildren = node.children;
       node.isfold = true;
       node.children.forEach(child => {
@@ -234,15 +203,15 @@ export default {
       // this.foldData=data
       //递归把原始数据改成绘图所需要的数据
       this.UpDateToFoldData(this.foldData);
-      console.log("this.treeData",this.TreeData)
-
-      console.log("this.foldData",this.foldData)
+      // console.log("this.treeData",this.TreeData)
+      //
+      // console.log("this.foldData",this.foldData)
 
       //渲染对象
       this.render(this.foldData)
     },
     GetAll() {
-      this.$axios.get(this.url + "/" + this.treeA + "/" + this.treeB).then(
+      this.$axios.post(this.url,this.TreeTypes).then(
         (res) => {
           this.TreeData = res.data
           this.Init(this.TreeData)
@@ -260,21 +229,13 @@ export default {
           draw: (cfg, group) => {
 
             //参数解析
-            const {depth, conceptHierarchy, nodeName, zhName, levelHierarchy, highLight,from} = cfg
+            const {depth, conceptHierarchy, nodeName, zhName, levelHierarchy,from} = cfg
             // 自定义模板
-            let shadow_color;
+            let shadow_color="gray";
             if (from==="mix")
             {
               shadow_color="#f8d004"
             }
-            else if (from===this.treeA)
-            {
-              shadow_color="blue"
-            }
-            else {
-              shadow_color="red"
-            }
-
             const adaptWidth = nodeName.length<30?300:nodeName.length*10
             const height=120
             const rectConfig = {
@@ -388,7 +349,6 @@ export default {
           {
             draw: (cfg, group) => {
 
-              const {highLight} = cfg
               const startPoint = cfg.startPoint;
               const endPoint = cfg.endPoint;
               const horizontalPath = [
@@ -408,8 +368,6 @@ export default {
 
                   shadowOffsetX: 0, // 模板阴影的X轴偏移量
                   shadowOffsetY: 0, // 模板阴影的Y轴偏移量
-                  shadowColor: highLight ? "red" : "#999",
-                  shadowBlur: highLight ? 10 : 0,
                   //设置用于笔触的颜色(RGB 或 16 进制)、渐变或模式，对应 Canvas 属性 strokeStyle。
                   // 取值示例：rgb(18, 150, 231)，#c193af，l(0) 0:#ffffff 0.5:#7ec2f3 1:#1890ff， r(0.5, 0.5, 0.1) 0:#ffffff 1:#1890ff。
                   stroke: '#8d8d8d',
@@ -439,27 +397,6 @@ export default {
       })
       treeGraph.on('node:click', (ev) =>  {
         const node = ev.item; // 被点击的节点元素
-        //如果开启修订模式,则修订
-        if (this.revision===true)
-        {
-          let {nodeName, zhName, introduce, conceptHierarchy, source, formula,children} = node.getModel()
-          node.getModel().highLight = !node.getModel().highLight
-          treeGraph.updateChildren(children, node.getModel().id)
-
-          //获取需要更新的元素
-          this.localZhNode = {
-            "节点名": nodeName,
-            "中文名": zhName,
-            "简介": introduce,
-            "概念层级": conceptHierarchy,
-            "来源": source,
-            "公式": formula
-          }
-          treeGraph.updateChildren(children, node.getModel().id)
-
-        }
-        else{
-          //  如果开启审阅模式
           //获取需要更新的元素
           let { foldchildren} = node.getModel()
           //如果为展开，则修令其折叠
@@ -468,25 +405,22 @@ export default {
           }
           node.getModel().isfold = !node.getModel().isfold
           treeGraph.updateChildren(foldchildren, node.getModel().id)
-        }
-
       })
       this.treeGraph = treeGraph
     },
-    drawGraph(){
-      //初始化结点类型
-      this.registerFn()
-      this.getTreeGraph();
-      this.GetAll()
-    }
   },
 
   mounted() {
-
     this.registerFn()
     this.getTreeGraph();
-    this.GetAll()
     this.GetTreeType()
+  },
+  beforeRouteLeave(to,from,next){
+    if (to.name==="描述符树冗余消除")
+    {
+      this.$store.commit("updateFusionTree",this.TreeData)
+    }
+    next()
   }
 }
 </script>

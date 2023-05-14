@@ -66,10 +66,10 @@ export default {
     GetAll(){
       this.$axios.get(this.url+this.type).then(
         (res)=>{
-          console.log(res.data)
+          // console.log(res.data)
           this.TreeData=[res.data]
           // this.TreeData._id=this.TreeData.id.counter
-          console.log(this.TreeData)
+          // console.log(this.TreeData)
         },
         (error)=>{
           console.log(error)
