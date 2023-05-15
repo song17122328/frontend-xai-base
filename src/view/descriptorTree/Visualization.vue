@@ -231,7 +231,7 @@ export default{
       //可视化树的种类
       url: "/Tree",
       TreeTypes: [],
-      TreeType: 'expert',
+      TreeType: '',
       TreeData: {},
       foldData: {},
       foldChildren: [],
@@ -745,14 +745,22 @@ export default{
 
     //从现有的类型中添加树
     GetTreeType() {
+      this.TreeTypes=[]
       this.$axios.get('/TreeStruct/types').then(
         (res) => {
           res.data.forEach((data)=>{
             this.TreeTypes.push(data)
           });
+          this.TreeType=this.TreeTypes[0]
+          if (this.TreeType){
+            this.GetAll()
+          }
+          else {
+            this.$message("暂无数据，请添加数据")
+          }
           // console.log("GetTreeType:",this.TreeTypes)
           //得到种类之后，再执行GetAll
-          this.GetAll()
+
         },
         error => {
           console.log(error)
@@ -900,11 +908,14 @@ export default{
           res=>{
             this.$message({
               type: 'success',
-              message: "删除成功，高亮父节点"
+              message: "删除成功"
             });
             this.isFind=false;
             this.FindNodeName=res.data
-            this.GetAll();
+            if (res.data==="删除成功"){
+              this.FindNodeName=''
+            }
+            this.GetTreeType();
           },
           error=>{
             this.$message({
@@ -931,11 +942,14 @@ export default{
           res=>{
             this.$message({
               type: 'success',
-              message: "删除成功，高亮父节点"
+              message: "删除成功"
             });
             this.isFind=false;
             this.FindNodeName=res.data
-            this.GetAll();
+            if (res.data==="删除成功"){
+              this.FindNodeName=''
+            }
+            this.GetTreeType();
           },
           error=>{
             this.$message({

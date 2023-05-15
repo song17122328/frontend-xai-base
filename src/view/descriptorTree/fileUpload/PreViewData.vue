@@ -72,6 +72,37 @@ export default {
       required: true
     },
   },
+  methods:{
+    commit(){
+      this.$confirm("确认提交到数据库吗？",'提示',{
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }) .then(() => {
+        // 需要把二维列表拉直成一维列表插入数据库
+        // console.log(this.myStructData.flat())
+        this.$axios.post("http://127.0.0.1:5000/TreeInfoData",this.myInfoData).then(
+          res=>{
+            this.$message({
+              type: 'success',
+              message: res.data
+            });
+          },
+          error=>{
+            this.$message({
+              type: 'error',
+              message: error.data
+            });
+          }
+        )
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+  },
   mounted() {
     // console.log(this.myInfoData)
     // console.log(typeof this.myInfoData)

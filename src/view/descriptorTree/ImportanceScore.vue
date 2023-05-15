@@ -1,12 +1,17 @@
 <!--描述符树重要度评分-->
 <template>
-  <div>重要度评分
+  <div
+    v-loading="loading"
+    element-loading-text="拼命加载中"
+    style="height: 640px"
+        >重要度评分
     <div>
       <el-button @click="ShowRETreeNodes">获取当前冗余消除树结点</el-button>
       <el-button @click="dialogFormVisible = true">剔除粗粒度结点</el-button>
-      <el-button @click="TF_IDF_Score">TF-IDF计算重要度评分</el-button>
+      <el-button @click="TF_IDF_Score">计算TF-IDF重要度评分</el-button>
+      <el-button @click="TF_IDF_Des">重要度评分筛选描述符</el-button>
     </div>
-    <ul v-show="isShowRETreeNodes">
+    <ul v-show="isShowRETreeNodes" >
       <li v-for="(value,index) in Nodes" :key="index">{{value}}</li>
     </ul>
     <el-dialog v-if="dialogFormVisible" title="选择粗粒度结点" :visible.sync="dialogFormVisible" append-to-body>
@@ -30,11 +35,14 @@
 
 <script>
 import FileSaver from 'file-saver'
+import * as XLSX from 'xlsx'
+
 export default {
   name: "ImportanceScore",
   data(){
 
     return {
+      loading:false,
       form: {},
       formLabelWidth: '120px',
       isShowRETreeNodes: false,
@@ -49,12 +57,50 @@ export default {
       return this.generateData()}
   },
   methods:{
-    TF_IDF_Score(){
-      this.$axios.post("http://127.0.0.1:5000/TF_IDF_Score",this.Nodes,{responseType: 'blob' }).then(
+    TF_IDF_Score() {
+      this.loading = true; // 显示加载状态
+
+      this.$axios.post("http://127.0.0.1:5000/TF_IDF_Score", this.Nodes, { responseType: 'blob' }).then(
+        response => {
+          FileSaver.saveAs(new Blob([response.data]), "TF_IDF_Score.xlsx");
+        },
+        error => {
+          console.log(error);
+        }
+      ).finally(() => {
+        this.loading = false; // 隐藏加载状态
+      });
+    },
+    TF_IDF_Des(){
+      this.$axios.get("http://127.0.0.1:5000/TF_IDF_Des").then(
         response=>{
+
           // 使用FileSaver.js将Excel文件保存到本地
-          FileSaver.saveAs(new Blob([response.data]), "TF_IDF_Score.xlsxgit");
-          },
+          const data=response.data.splice(',')
+
+          // 将数据转换为worksheet
+          const worksheet = XLSX.utils.sheet_add_json(
+            XLSX.utils.book_new().SheetNames[0],
+            data.map((item) => ({ A: item })),
+            { skipHeader: true }
+          );
+
+          // 将worksheet添加到workbook
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+          // 将workbook转换为二进制文件
+          const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+          // 创建Blob对象
+          const blob = new Blob([excelBuffer], {type: 'application/octet-stream'});
+
+          // 创建下载链接并模拟点击
+          const downloadLink = document.createElement('a');
+          downloadLink.href = window.URL.createObjectURL(blob);
+          downloadLink.download = 'Descriptors.xlsx';
+          downloadLink.click();
+        },
         error=>{
           console.log(error)
         }

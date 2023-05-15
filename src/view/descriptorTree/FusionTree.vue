@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div style="position: relative;top: 10px;left:560px">
-      <el-select  style="width: 400px;margin-right: 20px" v-if="isGetTypes" v-model="Trees" multiple placeholder="请选择">
+    <div style="position: relative;top: 10px;left:100px">
+      <el-select  style="width: 400px;margin-left: 350px" v-if="isGetTypes" v-model="Trees" multiple placeholder="请选择">
         <el-option
           v-for="item in TreeTypes"
           :key="item"
@@ -9,7 +9,7 @@
           :value="item">
         </el-option>
       </el-select>
-
+      <el-button @click="CreateFusionTree" type="primary" style="margin: 0 10px">新建融合树</el-button>
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
       <el-switch
@@ -29,8 +29,9 @@ import G6 from "@antv/g6";
 export default {
   data(){
     return{
+      hasFusionTree:false,
       TreeTypes: [],
-      Trees:[],
+      Trees:["textMining","expert",'feature'],
       isGetTypes:false,
       horizontalOrVertical:false,
       //横向锚点
@@ -85,18 +86,113 @@ export default {
   },
 
   methods: {
+    //获取数据并执行
+    GetAll() {
+      console.log(this.TreeTypes)
+      this.TreeTypes.forEach(type=>{
+        if (type==='fusion'){
+          this.hasFusionTree=true
+        }
+      })
+      if (this.hasFusionTree===true)
+      {
+        this.$axios.get("/Tree/fusion").then(
+          (res) => {
+            this.TreeData = res.data
+            this.Init(this.TreeData)
+          },
+          (error) => {
+            console.log(error)
+          })
+      }
+      else {
+        let types=[]
+        for(let i=0;i<=this.TreeTypes.length;i++)
+        {
+          if (this.TreeTypes[i]!=="fusion"){
+            types.push(this.TreeTypes[i])
+          }
+        }
+        this.$axios.post(this.url,types).then(
+          (res) => {
+            this.TreeData = res.data
+            //  再把新生成的融合树导入数据库
+            this.ImportToDB()
+            this.TreeTypes = []
+            this.$axios.get('/TreeStruct/types').then(
+              (res) => {
+                res.data.forEach((data) => {
+                  this.TreeTypes.push(data)
+                })
+              },
+              (error) => {
+                console.log(error)
+              })
+          })
+      }
+    },
+    //新建融合树并替换掉数据库里面的融合树
+    CreateFusionTree() {
+      //  先删除数据库里面的融合树结点
+      this.$axios.delete("/Tree/All",{data:{"nodeName":this.TreeData.nodeName,"id":this.TreeData._id}}).then(
+        response=>{
+          //再构建融合树
+          let types=[]
+          for(let i=0;i<=this.TreeTypes.length;i++)
+          {
+            if (this.TreeTypes[i]!=="fusion"){
+              types.push(this.TreeTypes[i])
+            }
+          }
+          this.$axios.post(this.url,types).then(
+            (res) => {
+              this.TreeData = res.data
+
+              this.ImportToDB()
+              this.$message({
+                type: 'success',
+                message: "新建成功"
+              });
+            },
+            (error) => {
+              console.log(error)
+            })
+        }
+      )
+    },
+
+    ImportToDB(){
+      this.$axios.post("http://127.0.0.1:5000/NestedToStructureToMongoDB",this.TreeData).then(
+        res=>{
+          this.$axios.post("http://127.0.0.1:5000/TreeStructData",res.data).then(
+            response=>{
+              this.$axios.get("/Tree/fusion").then(
+                (res) => {
+                  this.TreeData = res.data
+                  this.Init(this.TreeData)
+                  // console.log("this.FindNodeName.length",this.FindNodeName.length)
+                },
+                (error) => {
+                  console.log(error)
+                })
+            }
+          )
+        }
+      )
+    },
     //从现有的类型中添加树
     GetTreeType() {
       // console.log("GetTreeType")
+      this.TreeTypes=[]
       this.$axios.get('/TreeStruct/types').then(
         (res) => {
           res.data.forEach((data)=>{
             this.TreeTypes.push(data)
-            this.Trees.push(data)
           });
           //得到种类之后，再执行GetAll
           this.isGetTypes=true
-          this.GetAll()
+          this.GetAll();
+
         },
         error => {
           console.log(error)
@@ -209,16 +305,6 @@ export default {
 
       //渲染对象
       this.render(this.foldData)
-    },
-    GetAll() {
-      this.$axios.post(this.url,this.TreeTypes).then(
-        (res) => {
-          this.TreeData = res.data
-          this.Init(this.TreeData)
-        },
-        (error) => {
-          console.log(error)
-        })
     },
     registerFn() {
       G6.registerNode(
@@ -414,12 +500,10 @@ export default {
     this.registerFn()
     this.getTreeGraph();
     this.GetTreeType()
+
   },
   beforeRouteLeave(to,from,next){
-    if (to.name==="描述符树冗余消除")
-    {
-      this.$store.commit("updateFusionTree",this.TreeData)
-    }
+    this.$store.commit("updateFusionTree",this.TreeData)
     next()
   }
 }
