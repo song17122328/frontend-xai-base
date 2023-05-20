@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="display:inline-block;position: relative;top:-40px; left: 180px">
+    <div style="display:inline-block;position: relative;top:0px; left: 20px">
       <el-button @click="TreeCurrentNumber=TreeCurrentNumber-1" icon="el-icon-minus"
                  size="small" circle></el-button>
       <span style="color: #57ab57">共有{{this.TreeNumber}}课树，当前为第{{this.TreeCurrentNumber}}棵</span>
@@ -14,7 +14,7 @@
       </el-input>
     </div>
 
-    <div style="display:inline-block;position: relative;top: -40px;left:300px">
+    <div style="display:inline-block;position: relative;top: 0px;left:300px">
 
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
@@ -74,8 +74,7 @@ export default {
         '#D7D7D7'
       ],
       url:"FusionTree",
-      treeA:"expert",
-      treeB:"fusion",
+
 
       treeGraph:'',
     }

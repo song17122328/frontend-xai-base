@@ -99,17 +99,17 @@ export default new Router({
         //描述符树管理
         {
           path:"descriptorTree/fileUpload",
-          name:"文件上传、预览、导入",
+          name:"描述符树构建",
           component:DescriptorTreeFileUpload,
         },
         {
           path: 'descriptorTree/baseInfo',
-          name: '数据库增删改查',
+          name: '查看数据库',
           component: DescriptorTreeInfo,
         },
         {
           path:"descriptorTree/Visualization",
-          name:"可视化增删改查",
+          name:"描述符树可视化修改",
           component:DescriptorTreeVisualization,
         },
         {
@@ -125,7 +125,7 @@ export default new Router({
 
         {
           path:"descriptorTree/ImportanceScore",
-          name:"重要度评分",
+          name:"重要度评分及描述符选取",
           component:DescriptorTreeImportanceScore,
         },
 

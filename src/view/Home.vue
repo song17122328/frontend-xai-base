@@ -5,8 +5,8 @@
       <div class="header-content">
 
         <!--      标题logo-->
-        <div class="header-logo"  >
-          <img src="@/assets/logo-SHU-CES.jpeg" alt="logo" height="40px">
+        <div class="header-logo" >
+          <img src="@/assets/logo-课题组v2.png" alt="logo" height="40px">
           <span>NASICON型固态电解质
             <span style="width: 1px;height: 18px;background-color: #ccc;display: inline-block;margin: 0 10px;"></span>
             离子输运性能描述符树管理系统
@@ -26,7 +26,7 @@
     <el-container class="container_low">
       <!--      左侧导航栏 ,必须设置外层容器高度，让内层容器有滚动条-->
       <el-aside style="width: 280px; height: 648px;" >
-        <el-menu style="min-height: 648px" :default-active="String(11)" unique-opened>
+        <el-menu style="min-height: 648px" :default-active="defaultActive" unique-opened>
           <el-submenu :index="item.order" v-for="item in menuData" :key="item.order">
             <!--表示可以展开的一组 -->
             <template slot="title">
@@ -48,12 +48,11 @@
               <div v-show="showSteps" @click="StepRouterPush">
                   <el-steps :active="active" finish-status="success" align-center ref="steps">
                     <el-step title="快速开始" description=""></el-step>
-                    <el-step title="文件上传、预览、导入"></el-step>
-                    <el-step title="数据库增删改查"></el-step>
-                    <el-step title="可视化增删改查"></el-step>
+                    <el-step title="描述符树构建"></el-step>
+                    <el-step title="描述符树可视化修改"></el-step>
                     <el-step title="描述符树融合"></el-step>
                     <el-step title="描述符树冗余消除"></el-step>
-                    <el-step title="重要度评分"></el-step>
+                    <el-step title="重要度评分及描述符选取"></el-step>
                   </el-steps>
               </div>
             <div style="height:15px;font-size: 10px; background-color:#add8e640;" v-show="!showSteps">
@@ -71,6 +70,7 @@ export default {
   name: "Home",
   data(){
     return{
+      defaultActive:'11',
       countActive: sessionStorage.getItem('stepActove')||0,
       isBind:this.doNothing,
       showSteps:true,
@@ -100,7 +100,7 @@ export default {
         return Number(this.countActive);
       },
       set(value){
-        value=value%7
+        value=value%6
         sessionStorage.setItem('stepActove',value);
         this.countActive = value;
       },
@@ -112,6 +112,7 @@ export default {
     this.getMenuTree();
     this.getUserInfo();
     this.detectionRouter()
+
   },
 
   methods:{
@@ -122,7 +123,7 @@ export default {
       const RouterName=this.$refs.steps.$children[this.active].title
       //代表点击自身触发路由跳转，不会执行mouseEnter函数
       this.fromSelfClick=true
-
+      this.defaultActive="3"+this.active
       this.changePage(RouterName)
       this.detectionRouter()
     },
@@ -179,6 +180,7 @@ export default {
       this.$axios.post('/user/getMenuManageData',params).then(res => {
         if(res.data.code===1){
           this.menuData=JSON.parse(res.data.data);
+          console.log(this.menuData)
           // console.log(this.menuData)
         }else{
           this.$notify({

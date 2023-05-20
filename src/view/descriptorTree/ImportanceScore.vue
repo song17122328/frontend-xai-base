@@ -74,7 +74,7 @@ export default {
     TF_IDF_Des(){
       this.$axios.get("http://127.0.0.1:5000/TF_IDF_Des").then(
         response=>{
-
+          console.log(response.data)
           // 使用FileSaver.js将Excel文件保存到本地
           const data=response.data.splice(',')
 

@@ -4,14 +4,19 @@
       描述符树<span v-show="isShowTree" >隐藏</span><span v-show="!isShowTree">显示</span>
     </el-button>
 
+    <el-button @click="createExpertTree" type="primary">专家经验树构建</el-button>
+    <el-button @click="createExpertTree" type="primary">文本挖掘树构建</el-button>
+    <el-button @click="createExpertTree" type="primary">特征树构建</el-button>
+
     <el-upload
+      ref="fileUpload"
       style="display: inline-block"
       action="http://127.0.0.1:5000/TreeStruct"
       :before-upload="handleUploadTree"
       :headers="{ 'Content-Type': 'multipart/form-data' }"
       :on-success="handleSuccessTree"
     >
-      <el-button v-show="!isUploadTree" type="primary">上传描述符树</el-button>
+      <el-button v-show="!isUploadTree" type="primary" >其他述符树构建</el-button>
 
     </el-upload>
     <pre-view-tree v-if="isUploadTree" v-show="isShowTree" :my-tree-data="treeData" :my-struct-data="structData"></pre-view-tree>
@@ -54,6 +59,21 @@ export default {
       }
   },
   methods: {
+    createExpertTree(){
+      this.$confirm("请选择构建方式",{
+        confirmButtonText: '自动构建',
+        cancelButtonText: '手动构建',
+        type: "info"
+      }).then(
+        ()=>{
+          this.$refs.fileUpload.$refs['upload-inner'].handleClick()
+        }
+      )
+    },
+    createTextMiningTree(){
+
+    },
+    createFeatureTree(){},
     //描述符树上传成功后处理
     handleSuccessTree(response) {
       // console.log(response);
