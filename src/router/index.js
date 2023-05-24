@@ -19,16 +19,19 @@ import UserManage from '@/view/system/UserManage.vue'
 import UserInfo from '@/view/system/UserInfo.vue'
 
 
-//导入描述符树路由
-import DescriptorTreeInfo from '@/view/descriptorTree/baseInfo/index.vue'
-import DescriptorTreeVisualization from '@/view/descriptorTree/Visualization.vue'
-import DescriptorTreeFileUpload from '@/view/descriptorTree/fileUpload/index.vue'
-import DescriptorTreeFusionTree from "@/view/descriptorTree/FusionTree.vue"
-import DescriptorTreeRedundancyElimination from "@/view/descriptorTree/RedundancyElimination.vue"
-import DescriptorTreeImportanceScore from "@/view/descriptorTree/ImportanceScore.vue"
-//导入机器学习路由
-import MlData from '@/view/machineLearning/baseInfo.vue'
+//导入描述符树创建路由
+import DescriptorTreeInfo from '@/view/descriptorTreeCreate/baseInfo/index.vue'
+import DescriptorTreeVisualization from '@/view/descriptorTreeCreate/Visualization.vue'
+import DescriptorTreeFileUpload from '@/view/descriptorTreeCreate/fileUpload/index.vue'
+import DescriptorTreeFusionTree from "@/view/descriptorTreeCreate/FusionTree.vue"
+import DescriptorTreeRedundancyElimination from "@/view/descriptorTreeCreate/RedundancyElimination.vue"
 
+//导入描述符选取路由
+
+import ImportanceCalculation from "@/view/descriptorSelect/ImportanceCalculation.vue"
+import ImportanceVisualization from '@/view/descriptorSelect/ImportanceVisualization.vue'
+import ClassificationSelection from '@/view/descriptorSelect/ClassificationSelection.vue'
+import MlDataTemplate from '@/view/descriptorSelect/MlDataTemplate.vue'
 //导入关于我们 路由
 import ContactUs from "@/view/withUs/contact.vue"
 import OtherProject from "@/view/withUs/otherProject.vue"
@@ -99,7 +102,7 @@ export default new Router({
         //描述符树管理
         {
           path:"descriptorTree/fileUpload",
-          name:"描述符树构建",
+          name:"描述符树新建",
           component:DescriptorTreeFileUpload,
         },
         {
@@ -109,7 +112,7 @@ export default new Router({
         },
         {
           path:"descriptorTree/Visualization",
-          name:"描述符树可视化修改",
+          name:"描述符树修改",
           component:DescriptorTreeVisualization,
         },
         {
@@ -123,19 +126,32 @@ export default new Router({
           component:DescriptorTreeRedundancyElimination,
         },
 
-        {
-          path:"descriptorTree/ImportanceScore",
-          name:"重要度评分及描述符选取",
-          component:DescriptorTreeImportanceScore,
-        },
 
 
-        //机器学习管理
+
+        //描述符选取
+
         {
-          path: 'machineLearning/baseInfo',
-          name: '机器学习信息',
-          component: MlData,
+          path:"descriptorSelect/ImportanceCalculation",
+          name:"描述符重要度计算",
+          component:ImportanceCalculation,
         },
+        {
+          path: 'descriptorSelect/ImportanceVisualization',
+          name: '描述符重要度可视化',
+          component: ImportanceVisualization,
+        },
+        {
+          path: 'descriptorSelect/ClassificationSelection',
+          name: '描述符分类选取',
+          component: ClassificationSelection,
+        },
+        {
+          path: 'descriptorSelect/MlDataTemplate',
+          name: '机器学习样本模板下载',
+          component: MlDataTemplate,
+        },
+
       //  关于我们
         {
           path:"withUs/contact",

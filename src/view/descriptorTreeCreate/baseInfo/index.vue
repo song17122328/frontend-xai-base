@@ -3,13 +3,13 @@
 <!--      描述符树基本信息-->
 <!--    </span>-->
     <el-tabs class="tabs" v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="描述符树信息" name="first">
+      <el-tab-pane label="信息表" name="first">
         <DescriptorTreeInfo></DescriptorTreeInfo>
       </el-tab-pane>
-      <el-tab-pane label="描述符树结构" name="second">
+      <el-tab-pane label="结构表" name="second">
         <DescriptorTreeStruct></DescriptorTreeStruct>
       </el-tab-pane>
-      <el-tab-pane label="嵌套树" name="third">
+      <el-tab-pane label="嵌套表" name="third">
         <TreeTable></TreeTable>
       </el-tab-pane>
     </el-tabs>

@@ -176,10 +176,6 @@ export default {
     this.GetFusionTree()
     // console.log(this.TreeData)
   },
-  beforeRouteLeave(to, from, next) {
-    this.$store.commit("updateRedundancyEliminationTree",this.TreeData)
-    next();
-  },
 
 };
 </script>

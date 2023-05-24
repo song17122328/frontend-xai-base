@@ -3,29 +3,37 @@
 
     <el-collapse class="el-font" v-model="activeNames">
       <!--进度条介绍-->
-      <el-collapse-item title="上方进度条 Steps" name="1">
+      <el-collapse-item title="描述符树构建 Create" name="1">
 <!--        进度条操作介绍-->
-        <ul class="Hollow">
-          <li><span class="Blackbody gray">进入下一步:</span>&#9点击进度条。</li>
-          <li><span class="Blackbody gray">退回上一步:</span>&#9点击浏览器后退按钮</li>
-          <li><span class="Blackbody gray">进度条功能介绍如下:</span></li>
-        </ul>
+<!--        <ul class="Hollow">-->
+<!--          <li><span class="Blackbody gray">进入下一步:</span>&#9点击进度条。</li>-->
+<!--          <li><span class="Blackbody gray">退回上一步:</span>&#9点击浏览器后退按钮</li>-->
+<!--          <li><span class="Blackbody gray">进度条功能介绍如下:</span></li>-->
+<!--        </ul>-->
 
 <!--        进度条功能介绍-->
         <ul class="Solid indent ">
-          <li><span class="Blackbody">快速开始：</span>&#9本平台的开始处、记录了各页面的操作指南</li>
-          <li><span class="Blackbody">文件上传：</span>&#9上传描述符树EXCEL文件、描述符信息EXCEL文件、可将EXCEL转成JSON对象，并提供可视化预览、信息预览，
-            预览检查无误后可一键导入数据库</li>
-          <li><span class="Blackbody">数据库增删改查：</span>&#9可对当前数据库表的增删改查；数据库目前有三张表，分别为信息表、描述符结构表、描述符树层次表。</li>
-          <li><span class="Blackbody">可视化增删改查：</span>&#9可视化展示时实现增删改查，提供输入框查询，右键点击交互完成增加、修改、删除操作。</li>
-          <li><span class="Blackbody">描述符树融合：</span>&#9提供两棵树的融合操作，点击类型按钮可选择待融合的树，可选取数据库内的描述符树
-            或手动上传描述符树EXCEL文件，输出融合树，融合树结点的高亮颜色对应其来源。</li>
-          <li><span class="Blackbody">描述符树冗余消除：</span>&#9提供描述符树的冗余消除操作。输入一颗树，对其冗余消除；输入树从EXCEL表格、数据库获取，也可以是步骤五中产生的融合树</li>
-          <li><span class="Blackbody">重要度评分：</span>&#9输入描述符树或描述符结点，输出重要度评分表。描述符树提取描述符结点，利用文献库和TF-IDF算法计算其重要度。</li>
+          <li><span class="Blackbody">描述符树新建：</span>&#9支持基于EXCEL文件新建描述符树、针对性新建描述符树；并提供可视化预览、信息预览，一键导入数据库服务</li>
+          <li><span class="Blackbody">描述符树修改：</span>&#9支持交互完成描述符树CRUD操作，可视化展示描述符树。</li>
+          <li><span class="Blackbody">描述符树融合：</span>&#9支持专家经验树、文本挖掘树、特征树的融合。页面展示融合树</li>
+          <li><span class="Blackbody">描述符树冗余消除：</span>&#9提供融合树的冗余消除操作。1、冗余检测；2、删除冗余重复节点</li>
+          <li><span class="Blackbody">数据库增删改查：</span>&#9提供对当前数据库的CRUD操作；数据库有三张表，分别为信息表、结构表、嵌套表。</li>
+
         </ul>
       </el-collapse-item>
-      <el-collapse-item title="系统管理 System & Management " name="2">
-        <ul class="Hollow">
+      <el-collapse-item title="描述符选取 Select" name="2">
+        <ul class="Solid indent">
+          <li><span class="Blackbody">描述符重要度计算：</span>&#9基于文献库TF-IDF算法计算其重要度，基于描述符树计算其重要度。</li>
+          <li><span class="Blackbody">描述符重要度可视化：</span>&#9基于热力图的重要度可视化。</li>
+          <li><span class="Blackbody">描述符分类选取：</span>&#9提供手动或自动的描述符分类选取。</li>
+          <li><span class="Blackbody">机器学习样本模板下载：</span>&#9通过选取的描述符生成机器学习样本模板以供下载使用。</li>
+
+
+
+        </ul>
+      </el-collapse-item>
+      <el-collapse-item title="系统管理  System" name="3">
+        <ul class="Solid indent">
           <li><span class="Blackbody gray">平台管理：</span></li>
           <li><span class="Blackbody gray">用户管理：</span></li>
           <li><span class="Blackbody gray">用户信息：</span></li>
@@ -34,19 +42,10 @@
           <li><span class="Blackbody gray">操作管理：</span></li>
         </ul>
       </el-collapse-item>
-<!--      描述符及描述符树-->
-      <el-collapse-item title="描述符及描述符树 Descriptors & DescriptorTree" name="3">
-        <ul class="">
-          <li><span class="Blackbody gray">此部分介绍同进度条功能介绍，请见进度条功能</span></li>
-        </ul>
-      </el-collapse-item >
-      <el-collapse-item title="机器学习 Machine & Learning" name="4">
-        <ul class="Hollow">
-          <li><span class="Blackbody gray">机器学习信息：</span></li>
-        </ul>
-      </el-collapse-item>
-      <el-collapse-item title="关于我们 About & Us" name="5">
-        <ul class="Hollow">
+
+
+      <el-collapse-item title="关于我们 About" name="4">
+        <ul class="Solid indent">
           <li><span class="Blackbody gray">联系方式：</span> 提供课题及相关负责人联系方式</li>
           <li><span class="Blackbody gray">其他项目：</span> 友情项目或相关项目</li>
 
@@ -61,10 +60,13 @@
 export default {
   data() {
     return {
-      activeNames: ['1','2','3','4','5']
+      activeNames: [this.$store.state.localActive]
     };
   },
-  methods: {}
+  methods: {},
+  mounted() {
+    console.log(this.activeNames)
+  }
 }
 </script>
 

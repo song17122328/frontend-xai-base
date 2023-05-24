@@ -126,7 +126,7 @@ export default {
         type: 'info'
       }) .then(() => {
         // 需要把二维列表拉直成一维列表插入数据库
-        // console.log(this.myStructData.flat())
+        console.log(this.myStructData.flat())
         this.$axios.post("http://127.0.0.1:5000/TreeStructData",this.myStructData.flat()).then(
           res=>{
             this.$message({

@@ -8,6 +8,8 @@
                 class="filter-item"></el-input>
       <el-input placeholder="类型" v-model="pagination.treeType" style="width: 200px;"
                 class="filter-item"></el-input>
+      <el-input placeholder="得分" v-model="pagination.score" style="width: 200px;"
+                class="filter-item"></el-input>
       <el-input placeholder="孩子数组" v-model="pagination.childrenName" style="width: 200px;"
                 class="filter-item"></el-input>
       <el-button @click="getAll()" class="dalfBut">查询</el-button>
@@ -40,7 +42,10 @@
           <span style="white-space:pre-wrap;">{{scope.row.nodeName}}</span>
         </template>
       </el-table-column>
-
+      <el-table-column
+        label="得分"
+        prop="score">
+      </el-table-column>
       <el-table-column
         label="类型"
         prop="treeType">
@@ -120,9 +125,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
 
-        </el-row>
         <el-row>
           <el-col :span="24">
             <el-form-item label="孩子数组">
@@ -166,6 +169,7 @@ export default {
         nodeName: '',
         treeType: '',
         childrenName: '',
+        score:'',
       },
 
       //表单信息
@@ -197,6 +201,10 @@ export default {
       if (this.pagination.treeType !== "" && this.pagination.treeType.length!==0)
       {
         param += "&treeType=" + this.pagination.treeType;
+      }
+      if (this.pagination.score !== "" && this.pagination.score.length!==0)
+      {
+        param += "&score=" + this.pagination.score;
       }
       if (this.pagination.childrenName !== ""&& this.pagination.childrenName.length!==0)
       {
@@ -232,6 +240,7 @@ export default {
       this.pagination.nodeName = '';
       this.pagination.treeType = '';
       this.pagination.childrenName = '';
+      this.pagination.score=''
       this.getAll();
     },
     //  下面为编辑表单函数

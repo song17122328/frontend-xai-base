@@ -3,7 +3,7 @@
 /*设置右键菜单menu样式*/
   #mountNode{
     width: 1200px;
-    height: 550px;
+    height: 540px;
   }
 
   /*卡片样式*/
@@ -258,7 +258,7 @@ export default{
       defaultConfig: {
         backgroundColor: 'gray',
         width: 1200,
-        height: 550,
+        height: 540,
         modes: {
           // 支持的 behavior，默认模式为default
           // 'zoom-canvas'缩放画布，'drag-canvas'拖拽画布
@@ -270,7 +270,7 @@ export default{
         fitView: true, // 开启画布自适应。开启后图自动适配画布大小
         animate: true,
         // 图与画布的留白
-        fitViewPadding: [0,0,150,0],
+        fitViewPadding: [0,0,100,0],
 
         // 节点样式
         defaultNode: {
@@ -790,7 +790,7 @@ export default{
         (res) => {
           this.TreeData = res.data
           this.TreeData.conceptHierarchy = this.TreeType
-          // console.log(this.TreeData)
+          console.log(this.TreeData)
           this.Init(this.TreeData)
           // console.log("this.FindNodeName.length",this.FindNodeName.length)
           if(this.FindNodeName.length !== 0){
@@ -970,7 +970,6 @@ export default{
     //初始化结点类型
     this.registerFn()
     this.GetTreeType()
-    // console.log(this)
   }
 }
 </script>

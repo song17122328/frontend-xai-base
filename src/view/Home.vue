@@ -47,12 +47,8 @@
           <div ref="isShowSteps" v-on:mouseenter="this.isBind" v-on:mouseleave="this.isBind" style="padding-bottom: 5px">
               <div v-show="showSteps" @click="StepRouterPush">
                   <el-steps :active="active" finish-status="success" align-center ref="steps">
-                    <el-step title="快速开始" description=""></el-step>
-                    <el-step title="描述符树构建"></el-step>
-                    <el-step title="描述符树可视化修改"></el-step>
-                    <el-step title="描述符树融合"></el-step>
-                    <el-step title="描述符树冗余消除"></el-step>
-                    <el-step title="重要度评分及描述符选取"></el-step>
+                    <el-step :title="StepFirstName"></el-step>
+                    <el-step v-for="(value,index) in StepTitles" :title="value"></el-step>
                   </el-steps>
               </div>
             <div style="height:15px;font-size: 10px; background-color:#add8e640;" v-show="!showSteps">
@@ -70,6 +66,12 @@ export default {
   name: "Home",
   data(){
     return{
+      order:"3",
+      StepFirstName:'描述符树构建全流程',
+      //记录描述符树创建的路由名
+      DescriptorTreeCreateRouterNames:[],
+      DescriptorSelectRouterNames:[],
+      StepTitles:[],
       defaultActive:'11',
       countActive: sessionStorage.getItem('stepActove')||0,
       isBind:this.doNothing,
@@ -100,7 +102,7 @@ export default {
         return Number(this.countActive);
       },
       set(value){
-        value=value%6
+        value=value%(this.StepTitles.length+1)
         sessionStorage.setItem('stepActove',value);
         this.countActive = value;
       },
@@ -117,13 +119,30 @@ export default {
 
   methods:{
     StepRouterPush(){
-
+      let RouterName;
       this.active++
-      // console.log("点击事件触发了",this.active)
-      const RouterName=this.$refs.steps.$children[this.active].title
-      //代表点击自身触发路由跳转，不会执行mouseEnter函数
+      if (this.active===0){
+        if (this.StepFirstName==="描述符树构建全流程"){
+          this.StepTitles=this.DescriptorSelectRouterNames
+          this.StepFirstName="描述符选取全流程"
+          this.order="3"
+          this.$store.state.localActive="2"
+        }
+        else{
+          this.StepTitles=this.DescriptorTreeCreateRouterNames
+          this.StepFirstName="描述符树构建全流程"
+          this.order="2"
+          this.$store.state.localActive="1"
+        }
+        RouterName="快速开始"
+        this.defaultActive="11"
+      }
+      else{
+        RouterName=this.$refs.steps.$children[this.active].title
+        this.defaultActive=this.order+this.active
+      }
+
       this.fromSelfClick=true
-      this.defaultActive="3"+this.active
       this.changePage(RouterName)
       this.detectionRouter()
     },
@@ -180,6 +199,18 @@ export default {
       this.$axios.post('/user/getMenuManageData',params).then(res => {
         if(res.data.code===1){
           this.menuData=JSON.parse(res.data.data);
+          this.menuData[1].children.forEach(
+            child=>{
+              if(child.name!=="查看数据库")
+              this.DescriptorTreeCreateRouterNames.push(child.name)
+            }
+          )
+          this.menuData[2].children.forEach(
+            child=>{
+              this.DescriptorSelectRouterNames.push(child.name)
+            }
+          )
+          this.StepTitles=this.DescriptorTreeCreateRouterNames
           console.log(this.menuData)
           // console.log(this.menuData)
         }else{

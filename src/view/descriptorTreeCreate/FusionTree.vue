@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div style="position: relative;top: 10px;left:100px">
-      <el-select  style="width: 400px;margin-left: 350px" v-if="isGetTypes" v-model="Trees" multiple placeholder="请选择">
+    <div style="top: 10px;left:100px">
+      <el-select  style="width: 300px;" v-if="isGetTypes" v-model="Trees" multiple placeholder="请选择">
         <el-option
           v-for="item in TreeTypes"
           :key="item"
@@ -9,7 +9,9 @@
           :value="item">
         </el-option>
       </el-select>
-      <el-button @click="CreateFusionTree" type="primary" style="margin: 0 10px">新建融合树</el-button>
+      <el-button @click="showDiffTree(1,'min')" type="primary" style="margin: 0 10px">显示最小交集树</el-button>
+      <el-button @click="showDiffTree(0.5,'middle')" type="primary" style="margin: 0 10px">显示Middle树</el-button>
+      <el-button @click="showDiffTree(0,'max')" type="primary" style="margin: 0 10px">显示最大并集树</el-button>
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
       <el-switch
@@ -17,9 +19,17 @@
         active-color="#57ab57"
         inactive-color="#ce820f">
       </el-switch>
+      <span v-if="showTotal" style="color: #57ab57">全部展开</span>
+      <span v-if="!showTotal" style="color: #47ace5">隐藏所有</span>
+      <el-switch
+        v-model="showTotal"
+        active-color="#57ab57"
+        inactive-color="#47ace5">
+      </el-switch>
+      <el-button @click="CreateFusionTree" type="primary" style="margin: 0 10px">新建融合树</el-button>
     </div>
 
-    <div id="mountNode"></div>
+    <div id="mountNode" style="margin-top: 10px"></div>
   </div>
 </template>
 
@@ -29,6 +39,9 @@ import G6 from "@antv/g6";
 export default {
   data(){
     return{
+      showTotal:false,
+      selectLine:0,
+      selectType:"max",
       hasFusionTree:false,
       TreeTypes: [],
       Trees:["textMining","expert",'feature'],
@@ -78,27 +91,53 @@ export default {
           else {
             this.treeGraph.cfg.layout.direction="TB"
           }
-          // this.render(this.foldData)
           this.treeGraph.render()
         })
+      }
+    },
+    showTotal:{
+      handler(){
+        this.Init(this.TreeData)
       }
     }
   },
 
   methods: {
+
+    showDiffTree(Num,type){
+      this.$confirm("请选择显示形式",{
+        confirmButtonText:"在融合树中高亮显示",
+        cancelButtonText:"显示交集树"
+      }).then(
+        ()=>{
+          this.selectLine=0
+          this.selectType=type
+          this.Init(this.TreeData)
+        }
+      ).catch(
+        ()=>{
+          this.selectLine=Num
+          this.selectType=type
+          this.Init(this.TreeData)
+        }
+      )
+    },
+
     //获取数据并执行
     GetAll() {
-      console.log(this.TreeTypes)
+      // console.log(this.TreeTypes)
       this.TreeTypes.forEach(type=>{
         if (type==='fusion'){
           this.hasFusionTree=true
         }
       })
+
       if (this.hasFusionTree===true)
       {
         this.$axios.get("/Tree/fusion").then(
           (res) => {
             this.TreeData = res.data
+            this.TreeData.score=1
             this.Init(this.TreeData)
           },
           (error) => {
@@ -107,7 +146,7 @@ export default {
       }
       else {
         let types=[]
-        for(let i=0;i<=this.TreeTypes.length;i++)
+        for(let i=0;i<this.TreeTypes.length;i++)
         {
           if (this.TreeTypes[i]!=="fusion"){
             types.push(this.TreeTypes[i])
@@ -116,6 +155,7 @@ export default {
         this.$axios.post(this.url,types).then(
           (res) => {
             this.TreeData = res.data
+            this.TreeData.score=1
             //  再把新生成的融合树导入数据库
             this.ImportToDB()
             this.TreeTypes = []
@@ -133,12 +173,13 @@ export default {
     },
     //新建融合树并替换掉数据库里面的融合树
     CreateFusionTree() {
+      this.selectLine=0
       //  先删除数据库里面的融合树结点
       this.$axios.delete("/Tree/All",{data:{"nodeName":this.TreeData.nodeName,"id":this.TreeData._id}}).then(
         response=>{
           //再构建融合树
           let types=[]
-          for(let i=0;i<=this.TreeTypes.length;i++)
+          for(let i=0;i<this.TreeTypes.length;i++)
           {
             if (this.TreeTypes[i]!=="fusion"){
               types.push(this.TreeTypes[i])
@@ -147,7 +188,7 @@ export default {
           this.$axios.post(this.url,types).then(
             (res) => {
               this.TreeData = res.data
-
+              this.TreeData.score=1
               this.ImportToDB()
               this.$message({
                 type: 'success',
@@ -169,6 +210,7 @@ export default {
               this.$axios.get("/Tree/fusion").then(
                 (res) => {
                   this.TreeData = res.data
+
                   this.Init(this.TreeData)
                   // console.log("this.FindNodeName.length",this.FindNodeName.length)
                 },
@@ -214,7 +256,7 @@ export default {
         fitView: true, // 开启画布自适应。开启后图自动适配画布大小
           animate: true,
           // 图与画布的留白
-          fitViewPadding: [0,200,100,0],
+          fitViewPadding: [0,50,50,0],
 
           // 节点样式
           defaultNode: {
@@ -263,23 +305,37 @@ export default {
           },
         },
         maxZoom: 1,// 展开时的放缩比例
-          minZoom: 0.1
+        minZoom: 0.1
+      }
+    },
+    SelectData(node) {
+      // console.log("nodeName为："+node.nodeName+"开始遍历孩子");
+      node.foldchildren=node.children
+      node.isfold=false
+      if(!this.HasChild(node)) return
+      for (let i=0;i<node.children.length;i++){
+        if (node.children[i].score >= this.selectLine) {
+          // console.log("向下递归")
+          this.SelectData(node.children[i]);
+        } else {
+          // console.log("删除孩子，index为："+index,"孩子为："+node.children[index].nodeName)
+          // 直接修改父节点的children数组，将当前节点从数组中删除
+          node.children.splice(i, 1);
+          i--;
+        }
       }
     },
     //修改原数据为可折叠数据,
 
     UpDateToFoldData(node) {
-      //当前节点取消高亮
       node.foldchildren = node.children;
       node.isfold = true;
       node.children.forEach(child => {
-        //孩子结点取消高亮
-        child.highLight=false;
         //遍历孩子数组，如果孩子有孩子，则递归向下
         if (this.HasChild(child)) {
           this.UpDateToFoldData(child)
         }
-      }),
+      })
         //  最后把孩子数组置为空
         node.children = null;
     },
@@ -290,18 +346,23 @@ export default {
 
     render(data) {
       this.treeGraph.data(data) // 加载数据
+
       this.treeGraph.render() // 渲染
     },
     Init(data){
       //深拷贝一份数据
+      this.foldData=null
       this.foldData=JSON.parse(JSON.stringify(data))
+
       //浅拷贝，引用传递，foldData改变会引起data改变
-      // this.foldData=data
+
+      //根据得分筛选middle、max、min树
+      this.SelectData(this.foldData)
+      // console.log("SelectData:",this.foldData)
       //递归把原始数据改成绘图所需要的数据
-      this.UpDateToFoldData(this.foldData);
-      // console.log("this.treeData",this.TreeData)
-      //
-      // console.log("this.foldData",this.foldData)
+      if(!this.showTotal){
+        this.UpDateToFoldData(this.foldData);
+      }
 
       //渲染对象
       this.render(this.foldData)
@@ -315,12 +376,16 @@ export default {
           draw: (cfg, group) => {
 
             //参数解析
-            const {depth, conceptHierarchy, nodeName, zhName, levelHierarchy,from} = cfg
+            const {depth, conceptHierarchy, nodeName, zhName, levelHierarchy,score} = cfg
             // 自定义模板
             let shadow_color="gray";
-            if (from==="mix")
+            if (score>=0.5 && this.selectType==="middle")
             {
-              shadow_color="#f8d004"
+              shadow_color="#2a9c49"
+            }
+            if (score>=1 && this.selectType==="min")
+            {
+              shadow_color="#e44033"
             }
             const adaptWidth = nodeName.length<30?300:nodeName.length*10
             const height=120
@@ -483,14 +548,15 @@ export default {
       })
       treeGraph.on('node:click', (ev) =>  {
         const node = ev.item; // 被点击的节点元素
-          //获取需要更新的元素
-          let { foldchildren} = node.getModel()
           //如果为展开，则修令其折叠
-          if (node.getModel().isfold !== true) {
-            foldchildren = null;
+          //第一次isfold=true，foldchildren非空
+          if (node.getModel().isfold === true) {
+            treeGraph.updateChildren(node.getModel().foldchildren, node.getModel().id)
+          }
+          else{
+            treeGraph.updateChildren(null, node.getModel().id)
           }
           node.getModel().isfold = !node.getModel().isfold
-          treeGraph.updateChildren(foldchildren, node.getModel().id)
       })
       this.treeGraph = treeGraph
     },
@@ -500,12 +566,7 @@ export default {
     this.registerFn()
     this.getTreeGraph();
     this.GetTreeType()
-
   },
-  beforeRouteLeave(to,from,next){
-    this.$store.commit("updateFusionTree",this.TreeData)
-    next()
-  }
 }
 </script>
 

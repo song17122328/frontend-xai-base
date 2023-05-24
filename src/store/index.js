@@ -9,19 +9,15 @@ Vue.use(Vuex)
 const actions={}
 //准备mutations--用于操作数据（state）
 const mutations={
-  updateFusionTree(state, data) {
-    state.FusionTree = data;
-  },
-  updateRedundancyEliminationTree(state, data) {
-    state.RedundancyEliminationTree = data;
-  }
+
 }
 
 //准备state--用于存储数据
 const state={
-  FusionTree:{},
-  //冗余消除树RETree。RE:Redundancy Elimination,
-  RedundancyEliminationTree:{}
+  // 当前激活的流程:描述符树构建为1，描述符树选取为2
+    localActive:"1",
+    Score:[],
+    SelectScore:[]
 }
 
 //创建并导出store
