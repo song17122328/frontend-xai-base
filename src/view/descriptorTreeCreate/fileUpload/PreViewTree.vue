@@ -9,7 +9,7 @@
       <span style="margin-left:50px;" >该树类型为: </span>
 
       <el-input  v-if="dataLoaded"
-                 v-model="myTreeData[TreeCurrentNumber-1].TreeType"
+                 v-model="myTreeData[TreeCurrentNumber-1].treeType"
                  style="width: 100px">
       </el-input>
     </div>
@@ -111,13 +111,11 @@ export default {
   },
   methods:{
     commit(){
+      console.log(this.myStructData)
     //  修改类型
       for (let i=0;i<this.myTreeData.length;i++)
       {
-        this.myStructData[i].forEach((node)=>{
-          node["TreeType"]=this.myTreeData[i].TreeType
-        })
-        alert("第"+Number(i+1)+"课树的类型为"+this.myTreeData[i].TreeType)
+        alert("第"+Number(i+1)+"课树的类型为"+this.myTreeData[i].treeType)
       }
 
       this.$confirm("确认提交到数据库吗？",'提示',{
@@ -129,6 +127,7 @@ export default {
         console.log(this.myStructData.flat())
         this.$axios.post("http://127.0.0.1:5000/TreeStructData",this.myStructData.flat()).then(
           res=>{
+            console.log()
             this.$message({
               type: 'success',
               message: res.data

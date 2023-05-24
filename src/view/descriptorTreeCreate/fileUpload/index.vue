@@ -156,7 +156,16 @@ export default {
         // console.log(response.data);
         // console.log("this.treeData:",this.treeData)
         this.treeData=response.data['nested_JSON']
-        this.structData=response.data['structured_JSON']
+        console.log(this.treeData)
+        this.$axios.post("http://127.0.0.1:5000/NestedToStructureToMongoDB",this.treeData).then(
+          res=>{
+            console.log(res.data)
+            this.structData=res.data
+          }
+        )
+
+        // console.log(this.treeData)
+        console.log(this.structData)
         this.isUploadTree=true
         // 处理响应
       }).catch(error => {
