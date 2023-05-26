@@ -279,6 +279,7 @@ export default {
             this.GetRETreeNodes(child,child.nodeName)
           }
         )
+        console.log(this.Nodes)
         this.isShowRETreeNodes=true
       }
       else {

@@ -9,9 +9,9 @@
           :value="item">
         </el-option>
       </el-select>
-      <el-button @click="showDiffTree(1,'min')" type="primary" style="margin: 0 10px">显示最小交集树</el-button>
+      <el-button @click="showDiffTree(1,'min')" type="primary" style="margin: 0 10px">显示交集树</el-button>
       <el-button @click="showDiffTree(0.5,'middle')" type="primary" style="margin: 0 10px">显示Middle树</el-button>
-      <el-button @click="showDiffTree(0,'max')" type="primary" style="margin: 0 10px">显示最大并集树</el-button>
+      <el-button @click="showDiffTree(0,'max')" type="primary" style="margin: 0 10px">显示并集树</el-button>
       <span v-if="horizontalOrVertical" style="color: #57ab57">水平布局</span>
       <span v-if="!horizontalOrVertical" style="color: #ce820f">垂直布局</span>
       <el-switch
@@ -174,37 +174,51 @@ export default {
     //新建融合树并替换掉数据库里面的融合树
     CreateFusionTree() {
       this.selectLine=0
-      //  先删除数据库里面的融合树结点
-      this.$axios.delete("/Tree/All",{data:{"nodeName":this.TreeData.nodeName,"id":this.TreeData._id}}).then(
-        response=>{
-          //再构建融合树
-          let types=[]
-          for(let i=0;i<this.TreeTypes.length;i++)
-          {
-            if (this.TreeTypes[i]!=="fusion"){
-              types.push(this.TreeTypes[i])
-            }
+      console.log("this.TreeData.nodeName",this.TreeData)
+      if(!this.TreeData.nodeName)
+      {
+        this.$message.info("当前无融合树")
+        this.CreateTree()
+      }
+      else{
+        this.$axios.delete("/Tree/All",{data:{"nodeName":this.TreeData.nodeName,"id":this.TreeData._id}}).then(
+          response=>{
+            this.CreateTree()
           }
-          this.$axios.post(this.url,types).then(
-            (res) => {
-              this.TreeData = res.data
-              this.TreeData.score=1
-              this.ImportToDB()
-              this.$message({
-                type: 'success',
-                message: "新建成功"
-              });
-            },
-            (error) => {
-              console.log(error)
-            })
-        }
-      )
-    },
+        )
+      }
+      console.log()
+      //  先删除数据库里面的融合树结点
 
+    },
+    CreateTree(){
+      //再构建融合树
+      let types=[]
+      for(let i=0;i<this.TreeTypes.length;i++)
+      {
+        if (this.TreeTypes[i]!=="fusion"){
+          types.push(this.TreeTypes[i])
+        }
+      }
+      this.$axios.post(this.url,types).then(
+        (res) => {
+          console.log(this.res)
+          this.TreeData = res.data
+          this.TreeData.score=1
+          this.ImportToDB()
+          this.$message({
+            type: 'success',
+            message: "新建成功"
+          });
+        },
+        (error) => {
+          console.log(error)
+        })
+    },
     ImportToDB(){
       this.$axios.post("http://127.0.0.1:5000/NestedToStructureToMongoDB",this.TreeData).then(
         res=>{
+          console.log(res.data)
           this.$axios.post("http://127.0.0.1:5000/TreeStructData",res.data).then(
             response=>{
               this.$axios.get("/Tree/fusion").then(

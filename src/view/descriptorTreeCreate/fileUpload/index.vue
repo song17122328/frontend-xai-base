@@ -14,7 +14,7 @@
     >
       <el-button v-show="!isUploadTree" type="primary" >基于Excel构建</el-button>
     </el-upload>
-    <el-button @click="dialogVisible=true" type="primary">针对性构建</el-button>
+    <el-button @click="dialogVisible=true" type="primary">下载样例数据与针对性构建</el-button>
 
 
     <pre-view-tree v-if="isUploadTree" v-show="isShowTree" :my-tree-data="treeData" :my-struct-data="structData"></pre-view-tree>

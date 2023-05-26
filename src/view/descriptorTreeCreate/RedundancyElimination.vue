@@ -1,6 +1,6 @@
 <!--描述符树冗余消除-->
 <template>
-  <div>{{msg}}
+  <div>
 <!--    {{TreeData}}-->
     <div>
       <el-button @click="RedundancyDetection">冗余检测</el-button>
