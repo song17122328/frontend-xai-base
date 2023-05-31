@@ -3,14 +3,12 @@
       <el-button @click="GetHeatmap">显示热力图</el-button>
       <el-button @click="GetPiePic">显示饼图</el-button>
     <div style="position: relative;top: -110px;z-index: -1">
-      <el-loading :text="loadingText" :fullscreen="true" v-if="loading">
         <div v-if="showHeatmap">
           <img class="responsive-image" src="../../assets/Score_Heatmap.png" alt="Score Heatmap" />
         </div>
         <div v-else>
           <img style="max-width: 100%;" src="../../assets/pie_chart.png" alt="Pie Chart" />
         </div>
-      </el-loading>
     </div>
   </div>
 </template>
@@ -19,6 +17,7 @@
 import { Loading } from 'element-ui';
 export default {
   name: "ImportanceVisualization",
+
   data() {
     return {
       showHeatmap: true, // 默认显示热力图

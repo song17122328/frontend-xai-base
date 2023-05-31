@@ -2,21 +2,23 @@
 <template>
   <div style=" ">
     <el-button style="margin-bottom: 10px" @click="exportToExcel">导出成Excel</el-button>
-    <el-table
-      :data="Result"
-      border
-      max-height="550"
-      style="">
-      <template  v-for="(value,index) in Object.keys(Result[0])" >
-        {{value}}
-        <el-table-column
-          align="center"
-          :label="value"
-          :prop="value"
-          :width="index===0?300:200">
-        </el-table-column>
-      </template>
-    </el-table>
+
+
+      <el-table
+        :data="Result"
+        border
+        max-height="550"
+        style="">
+        <template v-for="(value,index) in columnName" >
+          {{value}}
+          <el-table-column
+            align="center"
+            :label="value"
+            :prop="value"
+            :width="index===0?300:200">
+          </el-table-column>
+        </template>
+      </el-table>
   </div>
 </template>
 
@@ -26,13 +28,14 @@
 <script>
 import * as XLSX from "xlsx";
 
+
 export default {
   data () {
     return {
       Result:[],
       ScoreData:[],
       MlData: [],
-
+      columnName:[],
       url:"MlData",
       }
   },
@@ -55,22 +58,34 @@ export default {
       // 导出 Excel 文件
       XLSX.writeFile(workbook, '机器学习样本模板.xlsx');
     },
+
     CreateData() {
-      console.log("this.MlData", this.MlData)
-      const newObj = this.ScoreData.reduce((result, obj) => {
+      let newObj={}
+
+      // console.log("this.MlData", this.MlData)
+
+      newObj = this.ScoreData.reduce((result, obj) => {
         const key = obj.Descriptor;
         result[key] = "待添加";
         return result;
       }, {});
-      console.log("newObj", newObj)
       for (let j = 0; j < this.MlData.length; j++) {
-        const data = {
+        let data={
           "化学式": this.MlData[j].chemicalFormula,
-          "ICSD": this.MlData[j].icsd,
-          ...newObj
+          "ICSD": this.MlData[j].icsd
+        };
+        if (this.ScoreData.length!==0){
+          console.log("不为0")
+          data = {
+            ...data,
+            ...newObj
+          }
         }
         this.Result.push(data)
       }
+
+      // console.log("newObj", newObj)
+      this.columnName=Object.keys(this.Result[0])
       console.log(this.Result)
     },
 
@@ -92,7 +107,7 @@ export default {
   },
   mounted() {
     this.ScoreData=this.$store.state.SelectScore
-    console.log(this.ScoreData)
+    // console.log(this.ScoreData)
   }
 }
 </script>

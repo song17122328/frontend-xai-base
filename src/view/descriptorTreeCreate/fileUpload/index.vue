@@ -52,13 +52,11 @@
 <script>
 import PreViewTree from './PreViewTree.vue';
 import PreViewData from './PreViewData.vue';
-import madeByHand from './madeByHand.vue';
 
 export default {
   components: {
     PreViewTree,
     PreViewData,
-    madeByHand
   },
   data() {
     return {
