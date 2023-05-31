@@ -7,9 +7,11 @@
     <div>
       <el-button @click="ShowRETreeNodes">获取当前冗余消除树结点</el-button>
       <el-button @click="dialogFormVisible = true">剔除粗粒度结点</el-button>
-      <el-button @click="TF_IDF_Score">获取TF-IDF的重要度计算</el-button>
-      <el-button @click="isShowUpdateWeight=true">调整权重</el-button>
-      <el-button @click="SaveScore">保存数据</el-button>
+      <el-button @click="TF_IDF_Score">基于TF-IDF的重要度计算</el-button>
+      <el-button @click="Formula_Score">基于公式的重要度计算</el-button>
+      <el-button @click="Available_Score">基于可获得性的重要度计算</el-button>
+      <el-button @click="isShowUpdateWeight=true" type="primary">调整权重</el-button>
+      <el-button @click="SaveScore" type="primary">保存数据</el-button>
     </div>
 <!--    <ul v-show="isShowRETreeNodes">-->
 <!--      <li v-for="(value,index) in Nodes" :key="index">{{value}}</li>-->
@@ -23,7 +25,6 @@
       <el-table-column
         prop="Descriptor"
         label="描述符"
-        width="240px"
       >
       </el-table-column>
       <el-table-column
@@ -34,12 +35,22 @@
       <el-table-column
         prop="TF_IDF_Score"
         sortable
-        :label="'TF_IDF得分-权重:'+weight[0]">
+        :label="'基于TF_IDF得分-'+weight[0]">
       </el-table-column>
       <el-table-column
         prop="DF_Score"
         sortable
-        :label="'描述符树得分-权重:'+weight[1]">
+        :label="'基于描述符树得分-'+weight[1]">
+      </el-table-column>
+      <el-table-column
+        prop="Formula_Score"
+        sortable
+        :label="'基于公式得分-'+weight[2]">
+      </el-table-column>
+      <el-table-column
+        prop="Available_Score"
+        sortable
+        :label="'基于可获得性得分-'+weight[3]">
       </el-table-column>
       <el-table-column
         prop="Score"
@@ -64,8 +75,8 @@
       </div>
     </el-dialog>
 
-    <el-dialog v-if="isShowUpdateWeight" title="调整权重" :visible.sync="isShowUpdateWeight" append-to-body>
-      <div v-for="(item,index) in weight" style="display: inline-block" class="circleBox">
+    <el-dialog style="width: 1800px;height: auto" v-if="isShowUpdateWeight" title="调整权重" :visible.sync="isShowUpdateWeight" append-to-body>
+      <div v-for="(item,index) in weight" style="display: inline-block;margin: 0" class="circleBox" >
         <el-progress type="dashboard" :percentage="percentage[index]" :color="colors" :show-text="false"></el-progress>
         <div class="circleCenter ">
           <div>{{item}}</div>
@@ -96,9 +107,9 @@ export default {
 
     return {
       isShowUpdateWeight:false,
-      percentage:[100,100],
-      weight:[1,1],
-      Names:["基于TF-IDF","基于描述符树"],
+      percentage:[100,100,100,100],
+      weight:[1,1,1,1],
+      Names:["基于TF-IDF","基于描述符树",'基于公式','基于可获得性'],
       colors: [
         {color: '#f56c6c', percentage: 20},
         {color: '#e6a23c', percentage: 40},
@@ -122,6 +133,20 @@ export default {
       handler(newValue) {
         for (let i = 0; i < newValue.length; i++) {
           this.$set(this.weight, i, newValue[i] / 100);
+        }
+      },
+      deep: true // 增加 deep 选项以监视数组内部元素的变化
+    },
+    Score: {
+      handler(newValue) {
+        console.log("触发了")
+        for (let i = 0; i < newValue.length; i++) {
+          const data=this.Score[i]
+          const all_score=data.TF_IDF_Score*this.weight[0]
+            + data.DF_Score*this.weight[1]
+            + data.Formula_Score*this.weight[2]
+            + data.Available_Score*this.weight[3]
+          this.Score[i].Score=all_score?all_score:0
         }
       },
       deep: true // 增加 deep 选项以监视数组内部元素的变化
@@ -164,6 +189,42 @@ export default {
     increase(Num) {
       const newValue = this.percentage[Num] + 10;
       this.$set(this.percentage, Num, Math.min(newValue, 100));
+    },
+    Formula_Score(){
+      this.$axios.get("http://127.0.0.1:5000/Formula_Score").then(
+        res=>{
+          console.log(res.data)
+          for (let i = 0; i < this.Score.length; i++) {
+            this.$set(this.Score[i], 'Formula_Score', 0);
+            for (let j = 0; j < res.data.length; j++) {
+              if (this.Score[i]['Descriptor']=== res.data[j].toLowerCase()) {
+                console.log(res.data[j].toLowerCase())
+                this.Score[i]['Formula_Score']=1
+                break; // 跳出内部的for循环
+              }
+            }
+          }
+          // console.log(this.Score)
+        }
+      )
+    },
+    Available_Score(){
+      this.$axios.get("http://127.0.0.1:5000/Available_Score").then(
+        res=>{
+          console.log(res.data)
+          for (let i = 0; i < this.Score.length; i++) {
+            this.$set(this.Score[i], 'Available_Score', 0);
+            for (let j = 0; j < res.data.length; j++) {
+              if (this.Score[i]['Descriptor']=== res.data[j].toLowerCase()) {
+                console.log(res.data[j].toLowerCase())
+                this.Score[i]['Available_Score']=1
+                break; // 跳出内部的for循环
+              }
+            }
+          }
+          console.log(this.Score)
+        }
+      )
     },
     TF_IDF_Score() {
       this.loading = true; // 显示加载状态

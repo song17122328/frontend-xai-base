@@ -9,7 +9,9 @@
           max-height="550"
           stripe
           style="width: 100%;"
-          @row-click="handleRowClick">
+          @select-all="handleSelectionChange"
+          @select="handleSelectClick"
+          @row-click.capture="handleRowClick">
           <el-table-column
             type="selection"
             width="150"
@@ -20,9 +22,12 @@
               {{ scope.row.Descriptor }}
             </template>
           </el-table-column>
+<!--          <el-table-column prop="Belong" min-width="150" sortable label="粗粒度层"></el-table-column>-->
           <el-table-column prop="Score" min-width="150" sortable label="总得分"></el-table-column>
-          <el-table-column prop="TF_IDF_Score" min-width="150" sortable label="TF_IDF得分"></el-table-column>
-          <el-table-column prop="DF_Score" min-width="150" sortable label="描述符树得分"></el-table-column>
+          <el-table-column prop="TF_IDF_Score" min-width="150" sortable label="基于TF_IDF得分"></el-table-column>
+          <el-table-column prop="DF_Score" min-width="150" sortable label="基于融合树得分"></el-table-column>
+          <el-table-column prop="Formula_Score" min-width="150" sortable label="基于公式得分"></el-table-column>
+          <el-table-column prop="Available_Score" min-width="150" sortable label="基于可获得性得分"></el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="查看选中&导出" name="operate">
@@ -30,7 +35,8 @@
         <el-button @click="SaveScore">保存数据</el-button>
         <el-button @click="exportToExcel">导出为Excel</el-button>
         <el-table
-          :data="selectedRows"
+          ref="result"
+          :data="multipleSelection"
           :default-sort="{ prop: 'Score', order: 'descending' }"
           max-height="550"
           stripe
@@ -56,7 +62,7 @@ export default {
   data() {
     return {
       refNames:["structure", "process", "condition", "composition"],
-      selectedRows: [], // 用于存储选中的行
+      showMultipleSelection:[],
       multipleSelection: [],
       activeName: 'process',
       Score:[],
@@ -67,6 +73,7 @@ export default {
     };
   },
   computed:{
+
     tableData(){
       return {
         "structure":this.structure,
@@ -77,13 +84,26 @@ export default {
     }
   },
   methods: {
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+      // console.log(val.length)
+      for (let i=0;i< this.multipleSelection.length;i++)
+      {
+        this.$nextTick(
+          ()=>{
+            this.multipleSelection[i]['isSelect']=!this.multipleSelection[i]['isSelect']
+          }
+        )
+
+      }
+    },
     SaveScore(){
       this.$confirm("保存供后续使用？",{
         confirmButtonText:"确定",
         cancelButtonText:"取消"
       }).then(
         ()=>{
-          this.$store.state.SelectScore=this.selectedRows
+          this.$store.state.SelectScore=this.multipleSelection
           this.$message.success("保存成功")
         }).catch(
         ()=>{
@@ -97,7 +117,7 @@ export default {
       const workbook = XLSX.utils.book_new();
 
       // 创建工作表对象
-      const worksheet = XLSX.utils.json_to_sheet(this.selectedRows);
+      const worksheet = XLSX.utils.json_to_sheet(this.multipleSelection);
 
       // 将工作表添加到工作簿
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -106,7 +126,7 @@ export default {
       XLSX.writeFile(workbook, '筛选描述符.xlsx');
     },
     DeleteSelect(){
-      this.selectedRows=[];
+      this.multipleSelection=[];
       // console.log( Object.keys(this.tableData))
       Object.keys(this.tableData).forEach(
         key=>{
@@ -114,20 +134,39 @@ export default {
         }
       )
     },
-    handleRowClick(row) {
-      // console.log(row,column,event)
-      const index = this.selectedRows.indexOf(row);
-      // this.$refs[row['Belong']].toggleRowSelection(row);
-      this.$refs[row['Belong']][0].toggleRowSelection(row)
-      // console.log()
-      // console.log(index)
-      if (index > -1) {
+    handleSelectClick(selection, row){
+      console.log(row.isSelect)
+      // console.log(this.multipleSelection.indexOf(row))
+      if (row['isSelect']) {
+        row['isSelect']=false
         // 如果行已经选中，则取消选中
-        this.selectedRows.splice(index, 1);
+        for(let index=0;index<this.multipleSelection.length;index++){
+          if (row===this.multipleSelection[index]){
+            this.multipleSelection.splice(index, 1);
+            break
+          }
+        }
       } else {
+        row['isSelect']=true
         // 如果行未选中，则添加到选中的行数组中
-        this.selectedRows.push(row);
+        this.multipleSelection.push(row);
       }
+      // console.log(selection,row)
+      this.$refs['result'].toggleRowSelection(row)
+      this.$nextTick(
+        ()=>{
+          // console.log("123",this.$refs['result'])
+
+        }
+      )
+    console.log(this.multipleSelection)
+    },
+    handleRowClick(row) {
+
+      this.$refs[row['Belong']][0].toggleRowSelection(row)
+
+      // console.log()
+      this.handleSelectClick(null,row)
     },
     handleClick(tab, event) {
       // console.log(tab, event);
@@ -135,6 +174,10 @@ export default {
   },
   mounted() {
     this.Score=this.$store.state.Score
+    for(let i=0;i<this.Score.length;i++){
+      this.$set(this.Score[i],'isSelect',false)
+    }
+    console.log(this.Score)
     this.Score.forEach(
       node=>{
         if (node['Belong']==="composition"){

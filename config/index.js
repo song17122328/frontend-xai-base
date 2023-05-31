@@ -46,6 +46,13 @@ module.exports = {
   },
 
   build: {
+    // webpack: {
+    //   // ...
+    //   performance: {
+    //     maxAssetSize: 10000000, // 10MB in bytes
+    //     maxEntrypointSize: 10000000 // 10MB in bytes
+    //   }
+    // },
     // Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
 
