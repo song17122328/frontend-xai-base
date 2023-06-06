@@ -20,6 +20,7 @@ export default {
 
   data() {
     return {
+      data:[],
       showHeatmap: true, // 默认显示热力图
       loading: null, // 加载框实例
       loadingText: '加载中...', // 加载框文字内容
@@ -35,26 +36,51 @@ export default {
     },
     GetHeatmap() {
       this.showLoading(); // 显示加载框
-      this.$axios.get("http://127.0.0.1:5000/BingPic").then(
+      this.$axios.post("http://127.0.0.1:5000/RePic",this.data).then(
         res => {
           if (res.data) {
             this.showHeatmap = true;
           }
+        }
+      ).catch(
+        error=>{
+          console.log(error)
+        }
+      ).finally(
+        ()=>{
           this.hideLoading(); // 隐藏加载框
         }
       );
     },
     GetPiePic() {
       this.showLoading(); // 显示加载框
-      this.$axios.get("http://127.0.0.1:5000/RePic").then(
+      this.$axios.post("http://127.0.0.1:5000/BingPic",this.data).then(
         res => {
           if (res.data) {
             this.showHeatmap = false;
           }
+        }
+      ).catch(
+        error=>{
+          console.log(error)
+        }
+      ).finally(
+        ()=>{
           this.hideLoading(); // 隐藏加载框
         }
       );
     },
+  },
+  mounted() {
+
+    this.$store.state.Score.forEach(
+      des=>{
+        const { Descriptor, Score,...other } = des;
+        const res={Descriptor,Score}
+        this.data.push(res)
+      }
+    )
+    // console.log(this.data)
   }
 }
 </script>

@@ -75,7 +75,7 @@ export default {
           "ICSD": this.MlData[j].icsd
         };
         if (this.ScoreData.length!==0){
-          console.log("不为0")
+          // console.log("不为0")
           data = {
             ...data,
             ...newObj
